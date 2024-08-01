@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             PojokEdukasiContentSeeder::class,
             ProgramSeeder::class,
             ProgramContentSeeder::class,
-            TrashPickupSeeder::class,
+            DeliverySeeder::class,
             HadiahSeeder::class,
             HistoryPointSeeder::class,
         ]);

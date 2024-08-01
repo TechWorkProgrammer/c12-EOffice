@@ -14,9 +14,9 @@ class HistoryPoint extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function trashPickup()
+    public function delivery()
     {
-        return $this->belongsTo(TrashPickup::class, 'trash_pickup_id');
+        return $this->belongsTo(Delivery::class, 'delivery_id');
     }
 
     public function hadiah()

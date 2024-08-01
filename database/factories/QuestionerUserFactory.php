@@ -18,6 +18,7 @@ class QuestionerUserFactory extends Factory
     {
         return [
             'user_id' => \App\Models\User::factory(),
+            'questioner_id' => \App\Models\Questioner::factory(),
             'answer' => $this->faker->paragraph,
         ];
     }

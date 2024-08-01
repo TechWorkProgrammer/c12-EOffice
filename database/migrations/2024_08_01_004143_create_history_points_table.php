@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('history_points', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('trash_pickup_id')->nullable()->constrained('trash_pickups');
+            $table->foreignId('delivery_id')->nullable()->constrained('deliveries');
             $table->foreignId('hadiah_id')->nullable()->constrained('hadiahs');
             $table->text('description');
             $table->integer('point');

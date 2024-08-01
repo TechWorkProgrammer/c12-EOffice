@@ -44,12 +44,12 @@ class User extends Authenticatable
 
     public function trashPickupsAsUser()
     {
-        return $this->hasMany(TrashPickup::class, 'user_id');
+        return $this->hasMany(Delivery::class, 'user_id');
     }
 
     public function trashPickupsAsDriver()
     {
-        return $this->hasMany(TrashPickup::class, 'driver_id');
+        return $this->hasMany(Delivery::class, 'driver_id');
     }
 
     public function questionerUser()

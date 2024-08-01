@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('trash_pickups', function (Blueprint $table) {
+        Schema::create('deliveries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('driver_id')->nullable()->constrained('users');
@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('longitude');
             $table->string('latitude');
             $table->float('distance');
+            $table->enum('type', ['pengambilan sampah', 'pengantaran hadiah']);
             $table->enum('status', ['waiting', 'on the way', 'picked up', 'delivered', 'canceled']);
             $table->float('weight')->nullable();
             $table->text('description')->nullable();
@@ -33,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('trash_pickups');
+        Schema::dropIfExists('deliverys');
     }
 };

@@ -19,8 +19,8 @@ class Admin extends Model
         return $this->hasMany(Program::class, 'created_by');
     }
 
-    public function trashPickups()
+    public function deliveries()
     {
-        return $this->hasMany(TrashPickup::class, 'admin_id');
+        return $this->hasMany(Delivery::class, 'admin_id');
     }
 }

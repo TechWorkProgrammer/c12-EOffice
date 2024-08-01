@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TrashPickup extends Model
+class Delivery extends Model
 {
     use HasFactory;
 
@@ -26,6 +26,6 @@ class TrashPickup extends Model
 
     public function historyPoint()
     {
-        return $this->hasOne(HistoryPoint::class, 'trash_pickup_id');
+        return $this->hasOne(HistoryPoint::class, 'delivery_id');
     }
 }

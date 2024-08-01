@@ -18,7 +18,7 @@ class HistoryPointFactory extends Factory
     {
         return [
             'user_id' => \App\Models\User::factory(),
-            'trash_pickup_id' => \App\Models\TrashPickup::factory(),
+            'delivery_id' => \App\Models\Delivery::factory(),
             'hadiah_id' => \App\Models\Hadiah::factory(),
             'description' => $this->faker->paragraph,
             'point' => $this->faker->numberBetween(0, 1000),

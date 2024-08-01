@@ -4,12 +4,12 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\TrashPickup;
+use App\Models\Delivery;
 
-class TrashPickupSeeder extends Seeder
+class DeliverySeeder extends Seeder
 {
     public function run()
     {
-        TrashPickup::factory()->count(10)->create();
+        Delivery::factory()->count(10)->create();
     }
 }

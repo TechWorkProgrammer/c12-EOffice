@@ -24,32 +24,23 @@
                             <thead>
                                 <tr>
                                     <th>Pertanyaan</th>
-                                    <th>Respon</th>
+                                    <th>Responden</th>
                                     <th>Rating</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Pertanyaan</td>
-                                    <td>20</td>
-                                    <td>4.9</td>
-                                    <td>
-                                        <button class="btn btn-success">Detail</button>
-                                        <button class="btn btn-secondary">Edit</button>
-                                        <button class="btn btn-danger">Hapus</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Unity Pugh</td>
-                                    <td>98</td>
-                                    <td>4.9</td>
-                                    <td>
-                                        <button class="btn btn-success">Detail</button>
-                                        <button class="btn btn-secondary">Edit</button>
-                                        <button class="btn btn-danger">Hapus</button>
-                                    </td>
-                                </tr>
+                                @foreach ($questioners as $questioner)
+                                    <tr>
+                                        <td>{{ $questioner->question }}</td>
+                                        <td>{{ $questioner->created_at }}</td>
+                                        <td>
+                                            <button class="btn btn-success">Detail</button>
+                                            <button class="btn btn-secondary">Edit</button>
+                                            <button class="btn btn-danger">Hapus</button>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
