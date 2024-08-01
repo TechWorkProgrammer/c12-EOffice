@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
-@section('title', 'Data | Pengguna')
+@section('title', 'Data | Program')
 @section('data', '')
-@section('data.pengguna', 'active')
+@section('data.program', 'active')
 
 @section('content')
     <div class="pagetitle">
-        <h1>Data Pengguna</h1>
+        <h1>Data Program</h1>
         <nav>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item">Data</li>
-                <li class="breadcrumb-item active">Pengguna</li>
+                <li class="breadcrumb-item active">Program</li>
             </ol>
         </nav>
     </div>
@@ -22,27 +22,26 @@
                     <div class="card-body pt-3">
                         <table class="table datatable">
                             <thead>
-                            <tr>
-                                <th>Nama</th>
-                                <th>No Telepon</th>
-                                <th>Aksi</th>
-                            </tr>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Gambar</th>
+                                    <th>Dibuat Oleh</th>
+                                    <th>Aksi</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>Un Pugh</td>
-                                <td>9958</td>
-                                <td>
-                                    <button class="btn btn-primary">Detail</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Unity Pugh</td>
-                                <td>98</td>
-                                <td>
-                                    <button class="btn btn-primary">Detail</button>
-                                </td>
-                            </tr>
+                                @foreach ($programs as $program)
+                                    <tr>
+                                        <td>{{ $program->name }}</td>
+                                        <td>
+                                            <img src="{{ $program->image }}" style="height: 80px">
+                                        </td>
+                                        <td>{{ $program->admin->username }}</td>
+                                        <td>
+                                            <button class="btn btn-primary">Detail</button>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>

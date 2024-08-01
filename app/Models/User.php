@@ -41,4 +41,24 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function trashPickupsAsUser()
+    {
+        return $this->hasMany(TrashPickup::class, 'user_id');
+    }
+
+    public function trashPickupsAsDriver()
+    {
+        return $this->hasMany(TrashPickup::class, 'driver_id');
+    }
+
+    public function questionerUser()
+    {
+        return $this->hasMany(QuestionerUser::class);
+    }
+
+    public function historyPoints()
+    {
+        return $this->hasMany(HistoryPoint::class);
+    }
 }

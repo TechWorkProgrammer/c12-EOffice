@@ -22,27 +22,38 @@
                     <div class="card-body pt-3">
                         <table class="table datatable">
                             <thead>
-                            <tr>
-                                <th>Nama</th>
-                                <th>No Telepon</th>
-                                <th>Aksi</th>
-                            </tr>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>No Telepon</th>
+                                    <th>Role</th>
+                                    <th>Tanggal Lahir</th>
+                                    <th>Alamat</th>
+                                    <th>Email</th>
+                                    <th>Poin</th>
+                                    <th>Kuesioner</th>
+                                    <th>Verifikasi</th>
+                                    <th>Dibuat Pada</th>
+                                    <th>Aksi</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>Un Pugh</td>
-                                <td>9958</td>
-                                <td>
-                                    <button class="btn btn-primary">Detail</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Unity Pugh</td>
-                                <td>98</td>
-                                <td>
-                                    <button class="btn btn-primary">Detail</button>
-                                </td>
-                            </tr>
+                                @foreach ($users as $user)
+                                    <tr>
+                                        <td>{{ $user->name }}</td>
+                                        <td>{{ $user->phone_number }}</td>
+                                        <td>{{ $user->role }}</td>
+                                        <td>{{ $user->birthdate }}</td>
+                                        <td>{{ $user->address }}</td>
+                                        <td>{{ $user->email }}</td>
+                                        <td>{{ $user->point }}</td>
+                                        <td>{{ $user->questioner_submitted }}</td>
+                                        <td>{{ $user->is_verified }}</td>
+                                        <td>{{ $user->created_at }}</td>
+                                        <td>
+                                            <button class="btn btn-primary">Detail</button>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>

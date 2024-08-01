@@ -1,16 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'Data | Pengguna')
+@section('title', 'Data | Edukasi')
 @section('data', '')
-@section('data.pengguna', 'active')
+@section('data.edukasi', 'active')
 
 @section('content')
     <div class="pagetitle">
-        <h1>Data Pengguna</h1>
+        <h1>Data Edukasi</h1>
         <nav>
+
             <ol class="breadcrumb">
                 <li class="breadcrumb-item">Data</li>
-                <li class="breadcrumb-item active">Pengguna</li>
+                <li class="breadcrumb-item active">Edukasi</li>
             </ol>
         </nav>
     </div>

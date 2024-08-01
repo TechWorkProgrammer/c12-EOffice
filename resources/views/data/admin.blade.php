@@ -20,22 +20,20 @@
 
                 <div class="card">
                     <div class="card-body pt-3">
-                        <table class="table">
+                        <table class="table datatable">
                             <thead>
-                            <tr>
-                                <th>Username</th>
-                                <th>Terakhir Login</th>
-                            </tr>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Dibuat Pada</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>Un Pugh</td>
-                                <td>9958</td>
-                            </tr>
-                            <tr>
-                                <td>Unity Pugh</td>
-                                <td>98</td>
-                            </tr>
+                                @foreach ($admins as $admin)
+                                    <tr>
+                                        <td>{{ $admin->username }}</td>
+                                        <td>{{ $admin->created_at }}</td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>

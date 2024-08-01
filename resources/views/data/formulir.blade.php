@@ -22,34 +22,34 @@
                     <div class="card-body pt-3">
                         <table class="table datatable">
                             <thead>
-                            <tr>
-                                <th>Pertanyaan</th>
-                                <th>Respon</th>
-                                <th>Rating</th>
-                                <th>Aksi</th>
-                            </tr>
+                                <tr>
+                                    <th>Pertanyaan</th>
+                                    <th>Respon</th>
+                                    <th>Rating</th>
+                                    <th>Aksi</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>Pertanyaan</td>
-                                <td>20</td>
-                                <td>4.9</td>
-                                <td>
-                                    <button class="btn btn-success">Detail</button>
-                                    <button class="btn btn-secondary">Edit</button>
-                                    <button class="btn btn-danger">Hapus</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Unity Pugh</td>
-                                <td>98</td>
-                                <td>4.9</td>
-                                <td>
-                                    <button class="btn btn-success">Detail</button>
-                                    <button class="btn btn-secondary">Edit</button>
-                                    <button class="btn btn-danger">Hapus</button>
-                                </td>
-                            </tr>
+                                <tr>
+                                    <td>Pertanyaan</td>
+                                    <td>20</td>
+                                    <td>4.9</td>
+                                    <td>
+                                        <button class="btn btn-success">Detail</button>
+                                        <button class="btn btn-secondary">Edit</button>
+                                        <button class="btn btn-danger">Hapus</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Unity Pugh</td>
+                                    <td>98</td>
+                                    <td>4.9</td>
+                                    <td>
+                                        <button class="btn btn-success">Detail</button>
+                                        <button class="btn btn-secondary">Edit</button>
+                                        <button class="btn btn-danger">Hapus</button>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>

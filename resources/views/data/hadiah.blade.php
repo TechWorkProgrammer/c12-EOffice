@@ -21,32 +21,29 @@
                     <div class="card-body pt-3">
                         <table class="table datatable">
                             <thead>
-                            <tr>
-                                <th>Nama Barang</th>
-                                <th>Quantitas</th>
-                                <th>Stok</th>
-                                <th>Aksi</th>
-                            </tr>
+                                <tr>
+                                    <th>Nama Barang</th>
+                                    <th>Poin</th>
+                                    <th>Gambar</th>
+                                    <th>Peluang</th>
+                                    <th>Aksi</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            <tr>
-                                <td>Beras</td>
-                                <td>2 Kg</td>
-                                <td>2</td>
-                                <td>
-                                    <button class="btn btn-secondary">Edit</button>
-                                    <button class="btn btn-danger">Hapus</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Minyak Goreng</td>
-                                <td>2 Liter</td>
-                                <td>1</td>
-                                <td>
-                                    <button class="btn btn-secondary">Edit</button>
-                                    <button class="btn btn-danger">Hapus</button>
-                                </td>
-                            </tr>
+                                @foreach ($hadiahs as $hadiah)
+                                    <tr>
+                                        <td>{{ $hadiah->name }}</td>
+                                        <td>{{ $hadiah->point }}</td>
+                                        <td>
+                                            <img src="{{ $hadiah->image }}" style="height: 80px">
+                                        </td>
+                                        <td>{{ $hadiah->possibility }}%</td>
+                                        <td>
+                                            <button class="btn btn-secondary">Edit</button>
+                                            <button class="btn btn-danger">Hapus</button>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
