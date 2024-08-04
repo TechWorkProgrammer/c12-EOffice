@@ -18,6 +18,7 @@ class QuestionerFactory extends Factory
     {
         return [
             'question' => $this->faker->paragraph,
+            'is_active' => $this->faker->boolean(80), // 80% chance of being true
         ];
     }
 }

@@ -19,7 +19,7 @@ class QuestionerUserFactory extends Factory
         return [
             'user_id' => \App\Models\User::factory(),
             'questioner_id' => \App\Models\Questioner::factory(),
-            'answer' => $this->faker->paragraph,
+            'answer' => $this->faker->numberBetween(1, 5), // Menghasilkan nilai integer antara 1 dan 5
         ];
     }
 }

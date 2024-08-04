@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('questioners', function (Blueprint $table) {
             $table->id();
             $table->text('question');
+            $table->boolean('is_active')->default(true);    
             $table->timestamps();
         });
     }
