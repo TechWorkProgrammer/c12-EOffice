@@ -2,15 +2,34 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ResponseHelper;
 use App\Models\PojokEdukasi;
+use Exception;
 use Illuminate\Http\Request;
 
 class PojokEdukasiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pojokEdukasis = PojokEdukasi::all();
-        return view('data.pojok_edukasi', compact('pojokEdukasis'));
+        try {
+            // Mengambil semua program beserta konten-kontennya
+            $pojokEdukasis = PojokEdukasi::with(['admin', 'contents'])->get();
+            if ($request->wantsJson()) {
+                // Jika request ingin JSON
+                return ResponseHelper::Success('pojok edukasi retrieved successfully', $pojokEdukasis);
+            } else {
+                // Jika request ingin view
+                return view('data.pojok_edukasi', compact('pojokEdukasis'));
+            }
+        } catch (Exception $e) {
+            // Menangani exception dan mengembalikan error message
+            if ($request->wantsJson()) {
+                return ResponseHelper::InternalServerError($e->getMessage());
+            }
+            // else {
+            //     return response()->view('errors.500', ['error' => $e->getMessage()], 500);
+            // }
+        }
     }
 
     public function create()

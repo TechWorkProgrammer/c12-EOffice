@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ResponseHelper;
+use App\Models\PojokEdukasi;
+use App\Models\Program;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -50,5 +53,45 @@ class UserController extends Controller
         $user->delete();
         return redirect()->route('users.index');
     }
-}
 
+    public function home(Request $request)
+    {
+        try {
+            // Mendapatkan user yang sedang login
+            // $user = auth()->user();
+            $validatedData = $request->validate([
+                'user_id' => 'required|integer|exists:users,id',
+            ]);
+
+            $user = User::find($validatedData['user_id']);
+
+            // Jika user tidak ditemukan, kembalikan response error
+            if (!$user) {
+                return ResponseHelper::BadRequest('user not found');
+            }
+
+            // Mengambil daftar program
+            $programs = Program::all(['id', 'name', 'image']);
+
+            // Mengambil daftar pojok edukasi
+            $pojokEdukasi = PojokEdukasi::all(['id', 'name', 'image']);
+
+            // Menyusun data untuk response
+            $data = [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'point' => $user->point,
+                ],
+                'programs' => $programs,
+                'pojok_edukasi' => $pojokEdukasi,
+            ];
+
+            // Mengembalikan response dalam bentuk JSON
+            return ResponseHelper::Success('user home data retrieved successfully', $data);
+        } catch (\Exception $e) {
+            // Mengembalikan response error jika terjadi exception
+            return ResponseHelper::InternalServerError('failed to retrieve user home data');
+        }
+    }
+}
