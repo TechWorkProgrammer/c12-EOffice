@@ -5,89 +5,106 @@ namespace App\Http\Controllers;
 use App\Helpers\ResponseHelper;
 use App\Models\Questioner;
 use App\Models\QuestionerUser;
+use App\Models\User;
 use Exception;
-use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class QuestionerController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
-        $questioners = Questioner::all();
-        return view('data.formulir', compact('questioners'));
+        $questioners = Questioner::withCount(['questionerUsers as respondents'])
+            ->withAvg('questionerUsers', 'answer')
+            ->get()
+            ->map(function ($questioner) {
+                $questioner->questioner_users_avg_answer = $questioner->questioner_users_avg_answer ?? 0;
+                return $questioner;
+            });
+
+        return ResponseHelper::Success('Questioners retrieved successfully', $questioners);
     }
 
-    public function create()
+
+    public function store(Request $request): JsonResponse
     {
-        return view('questioners.create');
+        $validatedData = $request->validate([
+            'question' => 'required|string',
+            'is_active' => 'boolean',
+        ]);
+        $questioner = Questioner::create($validatedData);
+        return ResponseHelper::Created('Questioner created successfully', $questioner);
     }
 
-    public function store(Request $request)
+    public function show(Questioner $questioner): JsonResponse
     {
-        $questioner = Questioner::create($request->all());
-        return redirect()->route('questioners.index');
+        $details = $questioner->questionerUsers()->with('user')->get();
+
+        $mappedDetails = $details->map(function ($questionerUser) {
+            return [
+                'name' => $questionerUser->user->name,
+                'answer' => $questionerUser->answer,
+            ];
+        });
+
+        return ResponseHelper::Success('Detailed questioner responses retrieved successfully', $mappedDetails);
     }
 
-    public function show(Questioner $questioner)
+    public function update(Request $request, Questioner $questioner): JsonResponse
     {
-        return view('questioners.show', compact('questioner'));
+        $validatedData = $request->validate([
+            'question' => 'sometimes|required|string',
+            'is_active' => 'sometimes|boolean',
+        ]);
+        $questioner->update($validatedData);
+        return ResponseHelper::Success('Questioner updated successfully');
     }
 
-    public function edit(Questioner $questioner)
+    public function getUnansweredQuestions(): JsonResponse
     {
-        return view('questioners.edit', compact('questioner'));
+        $user = Auth::guard('api')->user();
+        $unansweredQuestions = $user->getUnansweredActiveQuestions();
+
+        return ResponseHelper::Success('Unanswered active questions retrieved successfully.', $unansweredQuestions);
     }
 
-    public function update(Request $request, Questioner $questioner)
+    public function submitAnswer(Request $request): JsonResponse
     {
-        $questioner->update($request->all());
-        return redirect()->route('questioners.index');
-    }
+        $user = Auth::guard('api')->user();
 
-    public function destroy(Questioner $questioner)
-    {
-        $questioner->delete();
-        return redirect()->route('questioners.index');
-    }
+        $validatedData = $request->validate([
+            'questioner_id' => 'required|uuid|exists:questioners,uuid',
+            'answer' => 'required|integer|min:1|max:5',
+        ]);
 
-    public function showQuestion()
-    {
-         // Ambil questioner dengan is_active = true
-         $activeQuestions = Questioner::where('is_active', true)->get();
-         return ResponseHelper::Success('questions retrieved successfully', $activeQuestions);
-    }
-
-    public function submitQuestion(Request $request)
-    {
-        try {
-            // Validasi request
-            $validatedData = $request->validate([
-                'user_id' => 'required|exists:users,id',
-                'answers' => 'required|array',
-                'answers.*.questioner_id' => 'required|exists:questioners,id',
-                'answers.*.answer' => 'required|integer|between:1,5',
-            ]);
-
-            // Menyimpan jawaban ke tabel questioner_users
-            $responses = [];
-            foreach ($validatedData['answers'] as $answerData) {
-                $questionerUser = new QuestionerUser();
-                $questionerUser->user_id = $validatedData['user_id'];
-                $questionerUser->questioner_id = $answerData['questioner_id'];
-                $questionerUser->answer = $answerData['answer'];
-                $questionerUser->save();
-                $responses[] = $questionerUser;
+        if (!empty($user->uuid)) {
+            $existingAnswer = QuestionerUser::where('questioner_id', $validatedData['questioner_id'])
+                ->where('user_id', $user->uuid)
+                ->first();
+            if ($existingAnswer) {
+                return ResponseHelper::BadRequest('You have already answered this question.');
             }
-
-            // Return response JSON dengan pesan sukses
-            return ResponseHelper::Created('Answer submitted successfully', ['questionerUser' => $responses]);
-        } catch (QueryException $e) {
-            // Handle query exception
-            return ResponseHelper::InternalServerError($e->getMessage());
-        } catch (Exception $e) {
-            // Handle general exception
-            return ResponseHelper::InternalServerError($e->getMessage());
+            QuestionerUser::create([
+                'questioner_id' => $validatedData['questioner_id'],
+                'user_id' => $user->uuid,
+                'answer' => $validatedData['answer'],
+            ]);
         }
+
+        $remainingQuestions = $user->getUnansweredActiveQuestions()->count();
+
+        if ($remainingQuestions === 0) {
+            try {
+                if (!empty($user->uuid)) {
+                    User::where('uuid', $user->uuid)->update(['is_verified' => true]);
+                }
+            } catch (Exception $e) {
+                return ResponseHelper::InternalServerError('An error occurred while updating the user: ' . $e->getMessage());
+            }
+        }
+
+        return ResponseHelper::Success('Answer submitted successfully.', Auth::guard('api')->user());
     }
 }
 

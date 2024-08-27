@@ -2,63 +2,97 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Closure;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use Webpatser\Uuid\Uuid;
 
-class User extends Authenticatable
+/**
+ * @property mixed $phone_number
+ * @property mixed|string $password
+ * @property mixed $address
+ * @property mixed|string $email
+ * @property mixed $name
+ * @property mixed $birthdate
+ * @property mixed|string $role
+ * @property mixed $uuid
+ * @property int|mixed $point
+ * @property mixed|true $is_verified
+ * @method static updateOrCreate(array $array, array $userData)
+ * @method static find($uuid)
+ * @method static whereDoesntHave(string $string, Closure $param)
+ * @method static where(string $string, $uuid)
+ */
+class User extends Authenticatable implements JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    const ROLE_USER = 'user';
+    const ROLE_DRIVER = 'driver';
+    const ROLE_ADMIN = 'admin';
+
+    protected $primaryKey = "uuid";
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'phone_number', 'password', 'address', 'email', 'name', 'birthdate', 'role', 'is_verified', 'point'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
+    protected $casts = [
+        'uuid' => 'string',
+    ];
+
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    protected static function boot(): void
+    {
+        parent::boot();
 
-    public function trashPickupsAsUser()
+        static::creating(function ($model) {
+            $model->uuid = (string) Uuid::generate(4);
+        });
+    }
+
+    public function getJWTIdentifier()
+    {
+        return $this->uuid;
+    }
+
+    public function getJWTCustomClaims(): array
+    {
+        return [];
+    }
+
+    /*public function trashPickupsAsUser(): HasMany
     {
         return $this->hasMany(Delivery::class, 'user_id');
     }
 
-    public function trashPickupsAsDriver()
+    public function trashPickupsAsDriver(): HasMany
     {
         return $this->hasMany(Delivery::class, 'driver_id');
-    }
+    }*/
 
-    public function questionerUser()
+    public function questionerUsers(): HasMany
     {
-        return $this->hasMany(QuestionerUser::class);
+        return $this->hasMany(QuestionerUser::class, 'user_id');
     }
 
-    public function historyPoints()
+    public function getUnansweredActiveQuestions()
+    {
+        return Questioner::whereDoesntHave('questionerUsers', function ($query) {
+            $query->where('user_id', $this->uuid);
+        })->where('is_active', true)->get();
+    }
+/*
+    public function historyPoints(): HasMany
     {
         return $this->hasMany(HistoryPoint::class);
-    }
+    }*/
 }

@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('history_points', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('delivery_id')->nullable()->constrained('deliveries');
-            $table->foreignId('hadiah_id')->nullable()->constrained('hadiahs');
+            $table->uuid()->unique()->primary();
+            $table->foreignUuid('user_id')->references('uuid')->on('users');
+            $table->foreignUuid('delivery_id')->nullable()->references('uuid')->on('deliveries');
+            $table->foreignUuid('prizes_id')->nullable()->references('uuid')->on('prizes');
             $table->text('description');
             $table->integer('point');
             $table->timestamps();

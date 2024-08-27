@@ -4,64 +4,72 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
 use App\Models\Program;
-use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ProgramController extends Controller
 {
-    public function index(Request $request)
+    public function index(): JsonResponse
     {
-        try {
-            // Mengambil semua program beserta konten-kontennya
-            $programs = Program::with(['admin', 'contents'])->get();
-            if ($request->wantsJson()) {
-                // Jika request ingin JSON  
-                return ResponseHelper::Success('programs retrieved successfully', $programs);
-            } else {
-                // Jika request ingin view
-                return view('data.program', compact('programs'));
-            }
-        } catch (Exception $e) {
-            // Menangani exception dan mengembalikan error message
-            if ($request->wantsJson()) {
-                return ResponseHelper::InternalServerError($e->getMessage());
-            }
-            // else {
-            //     return response()->view('errors.500', ['error' => $e->getMessage()], 500);
-            // }
+        $programs = Program::with('contents')->get();
+        return ResponseHelper::Success('Programs retrieved successfully', $programs);
+    }
+
+    public function store(Request $request): JsonResponse
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp,heic|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('public/images');
+            $validatedData['image'] = env('APP_URL') . Storage::url($path);
         }
+
+        $validatedData['created_by'] = Auth::guard('api')->user()['uuid'];
+
+        $program = Program::create($validatedData);
+
+        return ResponseHelper::Created('Program created successfully', $program);
     }
 
-    public function create()
+    public function show(Program $program): JsonResponse
     {
-        return view('programs.create');
+        $program->load(['contents', 'creator']);
+        return ResponseHelper::Success('Program retrieved successfully', $program);
     }
 
-    public function store(Request $request)
+    public function update(Request $request, Program $program): JsonResponse
     {
-        $program = Program::create($request->all());
-        return redirect()->route('programs.index');
+        $validatedData = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp,heic|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            if ($program->image) {
+                Storage::delete(str_replace(env('APP_URL') . '/storage/', 'public/', $program->image));
+            }
+
+            $path = $request->file('image')->store('public/images');
+            $validatedData['image'] = env('APP_URL') . Storage::url($path);
+        }
+
+        $program->update($validatedData);
+
+        return ResponseHelper::Success('Program updated successfully', $program);
     }
 
-    public function show(Program $program)
+    public function destroy(Program $program): JsonResponse
     {
-        return view('programs.show', compact('program'));
-    }
+        if ($program->image) {
+            Storage::delete(str_replace(env('APP_URL') . '/storage/', 'public/', $program->image));
+        }
 
-    public function edit(Program $program)
-    {
-        return view('programs.edit', compact('program'));
-    }
-
-    public function update(Request $request, Program $program)
-    {
-        $program->update($request->all());
-        return redirect()->route('programs.index');
-    }
-
-    public function destroy(Program $program)
-    {
         $program->delete();
-        return redirect()->route('programs.index');
+        return ResponseHelper::Success('Program deleted successfully');
     }
 }

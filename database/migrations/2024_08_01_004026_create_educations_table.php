@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('program_contents', function (Blueprint $table) {
+        Schema::create('educations', function (Blueprint $table) {
             $table->uuid()->unique()->primary();
-            $table->foreignUuid('program_id')->references('uuid')->on('programs');
-            $table->string('name');
-            $table->text('link')->nullable();
+            $table->string('title');
             $table->text('cover')->nullable();
+            $table->text('link')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('program_contents');
+        Schema::dropIfExists('educations');
     }
 };

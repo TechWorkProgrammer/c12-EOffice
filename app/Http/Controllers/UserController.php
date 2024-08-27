@@ -3,95 +3,50 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
-use App\Models\PojokEdukasi;
-use App\Models\Program;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(): JsonResponse
     {
         $users = User::all();
-        foreach ($users as $user) {
-            $user->is_verified = $user->is_verified ? "Sudah" : "Belum";
-            $user->questioner_submitted = $user->questioner_submitted ? "Sudah" : "Belum";
-        }
-
-        return view('data.pengguna', compact('users'));
+        return ResponseHelper::Success('User data retrieved successfully', $users);
     }
 
-    public function create()
+    public function show(User $user): JsonResponse
     {
-        return view('users.create');
+        return ResponseHelper::Success('User retrieved successfully', $user);
     }
 
-    public function store(Request $request)
+    public function detailForm(User $user): JsonResponse
     {
-        $user = User::create($request->all());
-        return redirect()->route('users.index');
-    }
-
-    public function show(User $user)
-    {
-        return view('users.show', compact('user'));
-    }
-
-    public function edit(User $user)
-    {
-        return view('users.edit', compact('user'));
-    }
-
-    public function update(Request $request, User $user)
-    {
-        $user->update($request->all());
-        return redirect()->route('users.index');
-    }
-
-    public function destroy(User $user)
-    {
-        $user->delete();
-        return redirect()->route('users.index');
-    }
-
-    public function home(Request $request)
-    {
-        try {
-            // Mendapatkan user yang sedang login
-            // $user = auth()->user();
-            $validatedData = $request->validate([
-                'user_id' => 'required|integer|exists:users,id',
-            ]);
-
-            $user = User::find($validatedData['user_id']);
-
-            // Jika user tidak ditemukan, kembalikan response error
-            if (!$user) {
-                return ResponseHelper::BadRequest('user not found');
+        $questioner = $user->questionerUsers()->with('questioner')->get()->map(function ($questionerUser) {
+            if ($questionerUser->questioner) {
+                return [
+                    'question' => $questionerUser->questioner->question,
+                    'answer' => $questionerUser->answer,
+                ];
             }
 
-            // Mengambil daftar program
-            $programs = Program::all(['id', 'name', 'image']);
-
-            // Mengambil daftar pojok edukasi
-            $pojokEdukasi = PojokEdukasi::all(['id', 'name', 'image']);
-
-            // Menyusun data untuk response
-            $data = [
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'point' => $user->point,
-                ],
-                'programs' => $programs,
-                'pojok_edukasi' => $pojokEdukasi,
+            return [
+                'question' => 'Pertanyaan tidak ditemukan',
+                'answer' => $questionerUser->answer,
             ];
+        });
 
-            // Mengembalikan response dalam bentuk JSON
-            return ResponseHelper::Success('user home data retrieved successfully', $data);
-        } catch (\Exception $e) {
-            // Mengembalikan response error jika terjadi exception
-            return ResponseHelper::InternalServerError('failed to retrieve user home data');
-        }
+        return ResponseHelper::Success('Detail form user retrieved successfully', $questioner);
+    }
+
+    public function update(Request $request, User $user): JsonResponse
+    {
+        $validatedData = $request->validate([
+            'role' => 'required|string|in:user,driver,admin',
+        ]);
+
+        $user->update(['role' => $validatedData['role']]);
+
+        return ResponseHelper::Success('Role Pengguna Berhasil Diganti');
     }
 }

@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('deliveries', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('driver_id')->nullable()->constrained('users');
-            $table->foreignId('admin_id')->nullable()->constrained('admins');
+            $table->uuid()->unique()->primary();
+            $table->foreignUuid('user_id')->references('uuid')->on('users');
+            $table->foreignUuid('driver_id')->nullable()->references('uuid')->on('users');
+            $table->foreignUuid('admin_id')->nullable()->references('uuid')->on('users');
             $table->string('longitude');
             $table->string('latitude');
             $table->float('distance');
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->float('weight')->nullable();
             $table->text('description')->nullable();
             $table->datetime('confirmed_time')->nullable();
-            $table->integer('estimated_time')->nullable();
+            $table->time('estimated_time')->nullable();
             $table->timestamps();
         });
     }
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('deliverys');
+        Schema::dropIfExists('deliveries');
     }
 };

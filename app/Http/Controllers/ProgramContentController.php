@@ -2,47 +2,68 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ResponseHelper;
+use App\Models\Program;
 use App\Models\ProgramContent;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProgramContentController extends Controller
 {
-    public function index()
+    public function index(Program $program): JsonResponse
     {
-        $contents = ProgramContent::all();
-        return view('programContents.index', compact('contents'));
+        $contents = $program->contents;
+        return ResponseHelper::Success('Program contents retrieved successfully', $contents);
     }
 
-    public function create()
+    public function store(Request $request, Program $program): JsonResponse
     {
-        return view('programContents.create');
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'link' => 'nullable|url',
+            'cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp,heic|max:2048',
+        ]);
+
+        if ($request->hasFile('cover')) {
+            $path = $request->file('cover')->store('public/images');
+            $validatedData['cover'] = env('APP_URL') . Storage::url($path);
+        }
+        $validatedData['program_id'] = $program->uuid;
+        $content = ProgramContent::create($validatedData);
+        return ResponseHelper::Created('Program content created successfully', $content);
     }
 
-    public function store(Request $request)
+    public function show(ProgramContent $programContent): JsonResponse
     {
-        $content = ProgramContent::create($request->all());
-        return redirect()->route('programContents.index');
+        return ResponseHelper::Success('Program content retrieved successfully', $programContent);
     }
 
-    public function show(ProgramContent $content)
+    public function update(Request $request, ProgramContent $programContent): JsonResponse
     {
-        return view('programContents.show', compact('content'));
+        $validatedData = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'link' => 'nullable|url',
+            'cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp,heic|max:2048',
+        ]);
+
+        if ($request->hasFile('cover')) {
+            if ($programContent->cover) {
+                Storage::delete(str_replace(env('APP_URL') . '/storage/', 'public/', $programContent->cover));
+            }
+            $path = $request->file('cover')->store('public/images');
+            $validatedData['cover'] = env('APP_URL') . Storage::url($path);
+        }
+        $programContent->update($validatedData);
+        return ResponseHelper::Success('Program content updated successfully', $programContent);
     }
 
-    public function edit(ProgramContent $content)
+    public function destroy(ProgramContent $programContent): JsonResponse
     {
-        return view('programContents.edit', compact('content'));
-    }
-
-    public function update(Request $request, ProgramContent $content)
-    {
-        $content->update($request->all());
-        return redirect()->route('programContents.index');
-    }
-
-    public function destroy(ProgramContent $content)
-    {
-        $content->delete();
-        return redirect()->route('programContents.index');
+        if ($programContent->cover) {
+            Storage::delete(str_replace(env('APP_URL') . '/storage/', 'public/', $programContent->cover));
+        }
+        $programContent->delete();
+        return ResponseHelper::Success('Program content deleted successfully');
     }
 }

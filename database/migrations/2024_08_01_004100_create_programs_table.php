@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('programs', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 255);
-            $table->string('image')->nullable();
-            $table->foreignId('created_by')->constrained('admins');
+            $table->uuid()->unique()->primary();
+            $table->string('name');
+            $table->text('image')->nullable();
+            $table->foreignUuid('created_by')->references('uuid')->on('users');
             $table->timestamps();
         });
     }

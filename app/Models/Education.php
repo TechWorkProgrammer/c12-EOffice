@@ -4,21 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webpatser\Uuid\Uuid;
 
 /**
  * @method static create(array $validatedData)
- * @property mixed $image
- * @property mixed $contents
- * @property mixed $uuid
+ * @property mixed $cover
  */
-class Program extends Model
+class Education extends Model
 {
     use HasFactory;
 
-    protected $table = 'programs';
+    protected $table = "educations";
     protected $primaryKey = "uuid";
     protected $keyType = 'string';
     public $incrementing = false;
@@ -28,7 +24,7 @@ class Program extends Model
     ];
 
     protected $fillable = [
-        'name', 'image', 'created_by'
+        'title', 'cover', 'link'
     ];
 
     protected static function boot(): void
@@ -38,15 +34,5 @@ class Program extends Model
         static::creating(function ($model) {
             $model->uuid = (string)Uuid::generate(4);
         });
-    }
-
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by', 'uuid');
-    }
-
-    public function contents(): HasMany
-    {
-        return $this->hasMany(ProgramContent::class, 'program_id');
     }
 }
