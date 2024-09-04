@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('educations', function (Blueprint $table) {
             $table->uuid()->unique()->primary();
             $table->string('title');
-            $table->text('cover')->nullable();
             $table->text('link')->nullable();
             $table->timestamps();
         });

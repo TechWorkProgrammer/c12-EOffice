@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('prizes', function (Blueprint $table) {
             $table->uuid()->unique()->primary();
             $table->string('name');
-            $table->text('image')->nullable();
             $table->float('possibility');
             $table->timestamps();
         });

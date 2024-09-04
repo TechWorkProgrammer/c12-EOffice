@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Education;
+use App\Models\Prize;
 use App\Models\Program;
 use App\Models\ProgramContent;
 use App\Models\Questioner;
@@ -38,7 +39,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name' => 'Admin',
-                'phone_number' => '081234567892',
+                'phone_number' => 'Admin',
                 'password' => bcrypt('Admin'),
                 'address' => 'Jl. Kenanga No. 3',
                 'email' => 'admin@example.com',
@@ -107,17 +108,14 @@ class DatabaseSeeder extends Seeder
             [
                 'title' => 'Prosedur Bimbingan Akademik',
                 'link' => 'https://youtu.be/cYvKniM6-Qg?si=ljUTulLg2PTyegag',
-                'cover' => null,
             ],
             [
                 'title' => 'Virtual Sport',
                 'link' => 'https://youtu.be/mrSVWaI17Es?si=mRIvDCpRmHkDQRg7',
-                'cover' => null,
             ],
             [
                 'title' => 'Profil Laboratorium Robotika',
                 'link' => 'https://youtu.be/WVOWij_J4y8?si=8kmOKyeDnRPyCUOR',
-                'cover' => null,
             ],
         ];
 
@@ -149,9 +147,50 @@ class DatabaseSeeder extends Seeder
                     'program_id' => $program->uuid,
                     'name' => 'Webinar Filkom UB',
                     'link' => $link,
-                    'cover' => null,
                 ]);
             }
+        }
+
+        $prizes = [
+            [
+                'name' => 'Beras',
+                'possibility' => 20.0,
+            ],
+            [
+                'name' => 'Minyak Goreng',
+                'possibility' => 15.0,
+            ],
+            [
+                'name' => 'Gula',
+                'possibility' => 10.0,
+            ],
+            [
+                'name' => 'Tepung Terigu',
+                'possibility' => 10.0,
+            ],
+            [
+                'name' => 'Kopi',
+                'possibility' => 10.0,
+            ],
+            [
+                'name' => 'Susu Bubuk',
+                'possibility' => 10.0,
+            ],
+            [
+                'name' => 'Mie Instan',
+                'possibility' => 15.0,
+            ],
+            [
+                'name' => 'Telur Ayam',
+                'possibility' => 10.0,
+            ],
+        ];
+
+        foreach ($prizes as $prize) {
+            Prize::updateOrCreate(
+                ['name' => $prize['name']],
+                $prize
+            );
         }
     }
 }

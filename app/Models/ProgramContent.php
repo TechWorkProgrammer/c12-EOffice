@@ -25,7 +25,7 @@ class ProgramContent extends Model
     ];
 
     protected $fillable = [
-        'program_id', 'name', 'link', 'cover'
+        'program_id', 'name', 'link'
     ];
 
     protected static function boot(): void

@@ -6,7 +6,6 @@ use App\Helpers\ResponseHelper;
 use App\Models\Education;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class EducationController extends Controller
 {
@@ -20,14 +19,8 @@ class EducationController extends Controller
     {
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
-            'cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp,heic|max:2048',
             'link' => 'nullable|url'
         ]);
-
-        if ($request->hasFile('cover')) {
-            $path = $request->file('cover')->store('public/images');
-            $validatedData['cover'] = env('APP_URL') . Storage::url($path);
-        }
 
         $education = Education::create($validatedData);
 
@@ -43,18 +36,8 @@ class EducationController extends Controller
     {
         $validatedData = $request->validate([
             'title' => 'sometimes|required|string|max:255',
-            'cover' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp,heic|max:2048',
             'link' => 'nullable|url'
         ]);
-
-        if ($request->hasFile('cover')) {
-            if ($education->cover) {
-                Storage::delete(str_replace(env('APP_URL') . '/storage/', 'public/', $education->cover));
-            }
-
-            $path = $request->file('cover')->store('public/images');
-            $validatedData['cover'] = env('APP_URL') . Storage::url($path);
-        }
 
         $education->update($validatedData);
 
@@ -63,10 +46,6 @@ class EducationController extends Controller
 
     public function destroy(Education $education): JsonResponse
     {
-        if ($education->cover) {
-            Storage::delete(str_replace(env('APP_URL') . '/storage/', 'public/', $education->cover));
-        }
-
         $education->delete();
         return ResponseHelper::Success('Education deleted successfully');
     }

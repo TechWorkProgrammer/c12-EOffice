@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Closure;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,20 +12,20 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Webpatser\Uuid\Uuid;
 
 /**
- * @property mixed $phone_number
- * @property mixed|string $password
- * @property mixed $address
- * @property mixed|string $email
- * @property mixed $name
- * @property mixed $birthdate
- * @property mixed|string $role
- * @property mixed $uuid
- * @property int|mixed $point
- * @property mixed|true $is_verified
- * @method static updateOrCreate(array $array, array $userData)
- * @method static find($uuid)
- * @method static whereDoesntHave(string $string, Closure $param)
- * @method static where(string $string, $uuid)
+ * @property string $uuid
+ * @property string $phone_number
+ * @property string $password
+ * @property string $address
+ * @property string|null $email
+ * @property string $name
+ * @property string $birthdate
+ * @property string $role
+ * @property int $point
+ * @property bool $is_verified
+ * @method static Builder|User updateOrCreate(array $attributes, array $values)
+ * @method static Builder|User find($uuid)
+ * @method static Builder|User whereDoesntHave(string $relation, Closure $callback)
+ * @method static Builder|User where(string $column, $operator = null, $value = null, $boolean = 'and')
  */
 class User extends Authenticatable implements JWTSubject
 {
@@ -59,7 +60,7 @@ class User extends Authenticatable implements JWTSubject
         });
     }
 
-    public function getJWTIdentifier()
+    public function getJWTIdentifier(): string
     {
         return $this->uuid;
     }
@@ -68,16 +69,6 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
-
-    /*public function trashPickupsAsUser(): HasMany
-    {
-        return $this->hasMany(Delivery::class, 'user_id');
-    }
-
-    public function trashPickupsAsDriver(): HasMany
-    {
-        return $this->hasMany(Delivery::class, 'driver_id');
-    }*/
 
     public function questionerUsers(): HasMany
     {
@@ -90,9 +81,4 @@ class User extends Authenticatable implements JWTSubject
             $query->where('user_id', $this->uuid);
         })->where('is_active', true)->get();
     }
-/*
-    public function historyPoints(): HasMany
-    {
-        return $this->hasMany(HistoryPoint::class);
-    }*/
 }

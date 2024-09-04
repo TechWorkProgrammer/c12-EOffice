@@ -24,7 +24,7 @@ class Education extends Model
     ];
 
     protected $fillable = [
-        'title', 'cover', 'link'
+        'title', 'link'
     ];
 
     protected static function boot(): void

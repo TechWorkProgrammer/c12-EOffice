@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignUuid('program_id')->references('uuid')->on('programs');
             $table->string('name');
             $table->text('link')->nullable();
-            $table->text('cover')->nullable();
             $table->timestamps();
         });
     }

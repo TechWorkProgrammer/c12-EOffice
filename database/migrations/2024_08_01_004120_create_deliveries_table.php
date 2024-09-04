@@ -24,7 +24,7 @@ return new class extends Migration
             $table->float('weight')->nullable();
             $table->text('description')->nullable();
             $table->datetime('confirmed_time')->nullable();
-            $table->time('estimated_time')->nullable();
+            $table->integer('estimated_time')->nullable();
             $table->timestamps();
         });
     }

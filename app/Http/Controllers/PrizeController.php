@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Models\Delivery;
+use App\Models\HistoryPoint;
 use App\Models\Prize;
+use App\Models\Server;
+use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class PrizeController extends Controller
 {
@@ -22,15 +27,9 @@ class PrizeController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp,heic|max:2048',
         ]);
 
         $validatedData['possibility'] = 0;
-
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('public/images');
-            $validatedData['image'] = env('APP_URL') . Storage::url($path);
-        }
 
         $prize = Prize::create($validatedData);
         return ResponseHelper::Created('Prize created successfully', $prize);
@@ -45,17 +44,8 @@ class PrizeController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp,heic|max:2048',
             'possibility' => 'required|numeric|min:0',
         ]);
-
-        if ($request->hasFile('image')) {
-            if ($prize->image) {
-                Storage::delete(str_replace(env('APP_URL') . '/storage/', 'public/', $prize->image));
-            }
-            $path = $request->file('image')->store('public/images');
-            $validatedData['image'] = env('APP_URL') . Storage::url($path);
-        }
 
         $totalPossibility = Prize::where('uuid', '!=', $prize->uuid)->sum('possibility') + $validatedData['possibility'];
 
@@ -70,10 +60,6 @@ class PrizeController extends Controller
     public function destroy(Prize $prize): JsonResponse
     {
         DB::transaction(function () use ($prize) {
-            if ($prize->image) {
-                Storage::delete(str_replace(env('APP_URL') . '/storage/', 'public/', $prize->image));
-            }
-
             $remainingPrizes = Prize::where('uuid', '!=', $prize->uuid)->get();
 
             if ($remainingPrizes->isEmpty()) {
@@ -122,6 +108,114 @@ class PrizeController extends Controller
         });
 
         return ResponseHelper::Success('Prizes updated successfully');
+    }
+
+    public function claimPrize(): JsonResponse
+    {
+        $authUser = Auth::guard('api')->user();
+        if (!$authUser || empty($authUser->uuid)) {
+            return ResponseHelper::Unauthorized('User not authenticated.');
+        }
+
+        $user = User::find($authUser->uuid);
+        if (!$user) {
+            return ResponseHelper::Unauthorized('User not found.');
+        }
+
+        $server = Server::first();
+        if (!$server) {
+            return ResponseHelper::InternalServerError('Server settings not found.');
+        }
+
+        $prizePointCost = $server->prize_point;
+
+        $prizes = Prize::where('possibility', '>', 0)->get();
+        if ($prizes->isEmpty()) {
+            return ResponseHelper::BadRequest('Tidak ada Hadiah yang dapat diambil saat ini.');
+        }
+
+        $selectedPrize = $this->getRandomPrizeBasedOnPossibility($prizes);
+        if (!$selectedPrize) {
+            return ResponseHelper::InternalServerError('Gagal mengambil hadiah.');
+        }
+
+        DB::transaction(function () use ($user, $selectedPrize, $prizePointCost) {
+            if ($user->point < $prizePointCost) {
+                throw new Exception('Point tidak mencukupi.');
+            }
+            $user->decrement('point', $prizePointCost);
+
+            HistoryPoint::create([
+                'user_id' => $user->uuid,
+                'prizes_id' => $selectedPrize->uuid,
+                'description' => 'Hadiah Yang Didapat: ' . $selectedPrize->name,
+                'point' => -$prizePointCost,
+            ]);
+        });
+
+        return ResponseHelper::Success('Hadiah Berhasil Diambil', $selectedPrize);
+    }
+
+    public function listAndCheckPrizes(): JsonResponse
+    {
+        $user = Auth::guard('api')->user();
+        $server = Server::first();
+        $prizeExpirationDays = $server->prize_expiration ?? 7;
+
+        $prizes = Prize::whereHas('historyPoints', function ($query) use ($user) {
+            if (!empty($user->uuid)) {
+                $query->where('user_id', $user->uuid);
+            }
+        })->with(['historyPoints' => function ($query) use ($user) {
+            if (!empty($user->uuid)) {
+                $query->where('user_id', $user->uuid);
+            }
+        }])->get();
+
+        $mappedPrizes = $prizes->map(function ($prize) use ($prizeExpirationDays) {
+            $status = 'undelivered';
+            $availabilityMessage = 'Available for delivery';
+            $historyPoint = $prize->historyPoints->first();
+            if ($historyPoint) {
+                if ($historyPoint->delivery_id) {
+                    $delivery = Delivery::find($historyPoint->delivery_id);
+                    $status = $delivery ? $delivery->status : 'undelivered';
+                    $availabilityMessage = 'Prize already delivered';
+                } else {
+                    $obtainedAt = Carbon::parse($historyPoint->created_at);
+                    $expirationDate = $obtainedAt->copy()->addDays($prizeExpirationDays);
+
+                    if (Carbon::now()->greaterThan($expirationDate)) {
+                        $availabilityMessage = 'Prizes have expired and are no longer available for delivery';
+                    }
+                }
+            }
+
+            return [
+                'name' => $prize->name,
+                'status' => $status,
+                'obtained_at' => $historyPoint ? $historyPoint->created_at : null,
+                'availability' => $availabilityMessage,
+            ];
+        });
+
+        return ResponseHelper::Success('Prizes retrieved successfully.', $mappedPrizes);
+    }
+
+
+    private function getRandomPrizeBasedOnPossibility($prizes)
+    {
+        $totalWeight = $prizes->sum('possibility');
+        $randomWeight = mt_rand(1, (int)($totalWeight * 100)) / 100;
+
+        foreach ($prizes as $prize) {
+            if ($randomWeight <= $prize->possibility) {
+                return $prize;
+            }
+            $randomWeight -= $prize->possibility;
+        }
+
+        return null;
     }
 
 }

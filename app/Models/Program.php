@@ -28,7 +28,7 @@ class Program extends Model
     ];
 
     protected $fillable = [
-        'name', 'image', 'created_by'
+        'name', 'created_by'
     ];
 
     protected static function boot(): void

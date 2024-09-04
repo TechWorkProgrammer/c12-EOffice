@@ -43,7 +43,14 @@ class AuthController extends Controller
 
         $user->save();
 
-        return ResponseHelper::Created('Success Create new Account', $user);
+        if (!$token = Auth::guard('api')->attempt(['phone_number' => $validatedData['phone_number'], 'password' => $validatedData['password']])) {
+            return ResponseHelper::Unauthorized('Gagal melakukan autentikasi setelah registrasi.');
+        }
+
+        return ResponseHelper::Success('Akun berhasil dibuat dan login', [
+            'user' => $user,
+            'token' => $token,
+        ]);
     }
 
     public function login(Request $request): JsonResponse
