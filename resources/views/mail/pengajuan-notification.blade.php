@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surat Masuk</title>
+    <title>Pengajuan Surat Keluar</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -53,16 +53,16 @@
         <p><strong>Perihal</strong>: {{ $suratMasuk->perihal }}</p> --}}
 
         <p><strong>Kepada Yth.</strong></p>
-        <p>Bpk. {{ $suratMasuk->penerima->name }}<br>
-        <p>{{ $suratMasuk->penerima->pejabat->name }}<br>
+        <p>Bpk. {{ $penerima->name }}<br>
+        <p>{{ $penerima->pejabat->name }}<br>
         <p>Markas Besar Angkatan Darat</p>
         <p>Tentara Nasional Indonesia</p>
         <br>
         <p><strong>Dengan hormat,</strong></p>
 
-        <p>Bersama email ini, saya bermaksud memohon izin untuk mengirimkan surat {{ $suratMasuk->perihal }} kepada
-            Bapak/Ibu untuk ditinjau dan ditandatangani. Untuk detail informasi surat bisa diakses lebih lanjut di link berikut:</p>
-        <p>https://sparti.online/letters/in/detail?uuid={{ $suratMasuk->uuid }}</p>
+        <p>Bersama email ini, saya bermaksud memohon izin untuk mengirimkan draft surat {{ $pengajuan->perihal }} kepada
+            Bapak/Ibu untuk ditinjau dan ditandatangani. Untuk detail informasi draft surat bisa diakses lebih lanjut di link berikut:</p>
+        <p>https://sparti.online/letters/out/detail?uuid={{ $pengajuan->uuid }}</p>
         {{-- <ul>
             <li><strong>Hari/Tanggal</strong>: [Hari dan tanggal pelaksanaan]</li>
             <li><strong>Waktu</strong>: [Jam pelaksanaan]</li>
@@ -79,9 +79,9 @@
         <br>
         <div class="">
             <p>Hormat kami,</p>
-            <p>{{ $suratMasuk->creator->name }}</p>
+            <p>{{ $pengajuan->creator->name }}</p>
             {{-- <p>[NIP]</p> --}}
-            <p>{{ $suratMasuk->creator->role }}</p>
+            <p>{{ $pengajuan->creator->role }}</p>
             <p>Markas Besar Angkatan Darat</p>
             <p>Tentara Nasional Indonesia</p>
         </div>

@@ -22,18 +22,6 @@ class SuratMasukController extends Controller
      * Display a listing of the resource.
      */
 
-    public function sendmail()
-    {
-        try {
-            $userLogin = Auth::guard('api')->user();
-            Mail::to('muhammadirtada@student.ub.ac.id')->send(new SuratMasukNotification($userLogin->name, SuratMasuk::first()));
-
-            return ResponseHelper::Success('Surat Keluar created successfully', $userLogin);
-        } catch (\Exception $e) {
-            return ResponseHelper::InternalServerError($e->getMessage());
-        }
-    }
-
     public function index()
     {
         $userLogin = Auth::guard('api')->user();
@@ -130,6 +118,9 @@ class SuratMasukController extends Controller
             $validatedData['created_by'] = $userLogin->uuid;
 
             $suratMasuk = SuratMasuk::create($validatedData);
+
+            Mail::to($suratMasuk->penerima->email)->send(new SuratMasukNotification($userLogin->name, $suratMasuk));
+
             return ResponseHelper::Created('Surat Masuk created successfully', $suratMasuk);
         } catch (\Exception $e) {
             return ResponseHelper::InternalServerError($e->getMessage());

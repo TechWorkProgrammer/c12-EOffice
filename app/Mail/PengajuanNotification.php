@@ -10,21 +10,22 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class SuratMasukNotification extends Mailable
+class PengajuanNotification extends Mailable
 {
     use Queueable, SerializesModels;
 
     /**
      * Create a new message instance.
      */
-
     public $pengirim;
-    public $suratMasuk;
+    public $penerima;
+    public $pengajuan;
      
-    public function __construct($pengirim, $suratMasuk)
+    public function __construct($pengirim, $penerima, $pengajuan)
     {
         $this->pengirim = $pengirim;
-        $this->suratMasuk = $suratMasuk;
+        $this->penerima = $penerima;
+        $this->pengajuan = $pengajuan;
     }
 
     /**
@@ -34,7 +35,7 @@ class SuratMasukNotification extends Mailable
     {
         return new Envelope(
             from: new Address('sparti.office@gmail.com', $this->pengirim),
-            subject: 'Notifikasi Surat Masuk',
+            subject: 'Notifikasi Pengajuan Surat Keluar',
         );
     }
 
@@ -44,7 +45,7 @@ class SuratMasukNotification extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mail.surat-masuk-notification',
+            view: 'mail.pengajuan-notification',
         );
     }
 

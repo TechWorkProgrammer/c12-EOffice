@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Mail\SuratMasukNotification;
 use App\Models\Disposisi;
 use App\Models\IsiDisposisi;
 use App\Models\LogDisposisi;
@@ -11,6 +12,7 @@ use App\Models\MUser;
 use App\Models\SuratMasuk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class DisposisiController extends Controller
@@ -102,6 +104,7 @@ class DisposisiController extends Controller
                     'penerima' => $penerimaId,
                     'disposisi_id' => $disposisi->uuid,
                 ]);
+                Mail::to($suratId->penerima->email)->send(new SuratMasukNotification($userLogin->name, $suratId));
             }
 
             return ResponseHelper::Created('Disposisi created successfully');

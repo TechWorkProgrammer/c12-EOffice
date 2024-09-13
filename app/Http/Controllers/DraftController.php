@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Mail\PengajuanNotification;
 use App\Models\Draft;
 use App\Models\Pengajuan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class DraftController extends Controller
@@ -74,7 +76,7 @@ class DraftController extends Controller
 
             $draft = Draft::create($validatedData);
 
-            $penerima = $userLogin->pejabat_id;
+            $penerima = $userLogin->pejabat->user;
             if ($userLogin->pejabat->name == 'Pejabat') {
                 $penerima = $userLogin->pejabat->atasan->user;
             }
@@ -83,6 +85,8 @@ class DraftController extends Controller
                 'draft_id' => $draft->uuid,
                 'penerima_id' => $penerima->uuid
             ]);
+
+            Mail::to($penerima->email)->send(new PengajuanNotification($userLogin->name, $penerima, $draft));
 
             return ResponseHelper::Created('draft created successfully');
         } catch (\Exception $e) {
@@ -113,11 +117,14 @@ class DraftController extends Controller
             $penerima = $userLogin->pejabat->atasan;
 
             if (isset($penerima)) {
-                Pengajuan::create([
+                $draftPengajuan = Pengajuan::create([
                     'draft_id' => $draftId->uuid,
                     'penerima_id' => $penerima->user->uuid,
                     'pengajuan_asal' => $pengajuan->uuid
                 ]);
+
+                Mail::to($penerima->user->email)->send(new PengajuanNotification($userLogin->name, $penerima->user, $draftPengajuan));
+
             }else {
                 $draftStatus = $pengajuan->status == 'Diterima' ? 'Diterima' : 'Ditolak';
                 $draftId->update(['status' => $draftStatus]);
