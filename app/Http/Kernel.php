@@ -68,11 +68,11 @@ class Kernel extends HttpKernel
      */
     protected $middlewareAliases = [
         'auth' => CustomAuthentication::class,
-        'auth.user' => RoleMiddleware::class . ':user',
-        'auth.driver' => RoleMiddleware::class . ':driver',
-        'auth.admin' => RoleMiddleware::class . ':admin',
-        'auth.user_or_driver' => RoleMiddleware::class . ':user,driver',
-        'auth.any' => RoleMiddleware::class . ':user,driver,admin',
+        'auth.any' => RoleMiddleware::class . ':Tata Usaha,Pejabat,Pelaksana,Eksternal',
+        'auth.any.pelaksana' => RoleMiddleware::class . ':Pelaksana,Eksternal',
+        'auth.pejabat' => RoleMiddleware::class . ':Pejabat',
+        'auth.tata-usaha' => RoleMiddleware::class . ':Tata Usaha',
+        'auth.admin' => RoleMiddleware::class . ':Admin',
         'auth.basic' => AuthenticateWithBasicAuth::class,
         'auth.session' => AuthenticateSession::class,
         'cache.headers' => SetCacheHeaders::class,
