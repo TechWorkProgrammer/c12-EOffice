@@ -12,11 +12,7 @@ class DatabaseSeeder extends Seeder
             MPejabatSeeder::class,
             MUserSeeder::class,
             MKlasifikasiSuratSeeder::class,
-            SuratMasukSeeder::class,
             MIsiDisposisiSeeder::class,
-            DisposisiSeeder::class,
-            IsiDisposisiSeeder::class,
-            LogDisposisiSeeder::class,
         ]);
     }
 }

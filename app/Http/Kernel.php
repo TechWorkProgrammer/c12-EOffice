@@ -72,7 +72,7 @@ class Kernel extends HttpKernel
         'auth.any.pelaksana' => RoleMiddleware::class . ':Pelaksana,Eksternal',
         'auth.pejabat' => RoleMiddleware::class . ':Pejabat',
         'auth.tata-usaha' => RoleMiddleware::class . ':Tata Usaha',
-        'auth.admin' => RoleMiddleware::class . ':Admin',
+        'auth.administrator' => RoleMiddleware::class . ':administrator',
         'auth.basic' => AuthenticateWithBasicAuth::class,
         'auth.session' => AuthenticateSession::class,
         'cache.headers' => SetCacheHeaders::class,

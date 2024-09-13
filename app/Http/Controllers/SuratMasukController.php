@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
+use App\Mail\SuratMasukNotification;
 use App\Models\Disposisi;
 use App\Models\LogDisposisi;
 use App\Models\MKlasifikasiSurat;
@@ -12,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class SuratMasukController extends Controller
@@ -19,6 +21,19 @@ class SuratMasukController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public function sendmail()
+    {
+        try {
+            $userLogin = Auth::guard('api')->user();
+            Mail::to('muhammadirtada@student.ub.ac.id')->send(new SuratMasukNotification($userLogin->name, SuratMasuk::first()));
+
+            return ResponseHelper::Success('Surat Keluar created successfully', $userLogin);
+        } catch (\Exception $e) {
+            return ResponseHelper::InternalServerError($e->getMessage());
+        }
+    }
+
     public function index()
     {
         $userLogin = Auth::guard('api')->user();
@@ -39,14 +54,14 @@ class SuratMasukController extends Controller
                     }
                 }
                 break;
-            
-            case 'Pelaksana':
-                    $datas = [];
-                    $logDisposisis = LogDisposisi::where('penerima', '=', $userLogin->uuid)->get();
 
-                    foreach ($logDisposisis as $logDisposisi) {
-                        array_push($datas, $logDisposisi->disposisi->suratMasuk);
-                    }
+            case 'Pelaksana':
+                $datas = [];
+                $logDisposisis = LogDisposisi::where('penerima', '=', $userLogin->uuid)->get();
+
+                foreach ($logDisposisis as $logDisposisi) {
+                    array_push($datas, $logDisposisi->disposisi->suratMasuk);
+                }
                 break;
         }
 
@@ -71,7 +86,7 @@ class SuratMasukController extends Controller
                 'level_jabatan' => 1,
             ]);
 
-            foreach ($userPejabat->pejabat->bawahans as $bawahan ) {
+            foreach ($userPejabat->pejabat->bawahans as $bawahan) {
                 array_push($userHasil, [
                     'uuid' => $userPejabat->uuid,
                     'name' => $bawahan->user->name,

@@ -13,9 +13,15 @@ Route::view('/', "index")->name("home");
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
-Route::get('pejabat', [PejabatController::class, 'index']);
+
+Route::prefix('pejabat')->group(function () {
+    Route::get('', [PejabatController::class, 'index']);
+    Route::post('', [PejabatController::class, 'store'])->middleware('auth.administrator');
+});
 
 Route::middleware('auth.any')->group(function () {
+    Route::post('send-mail', [SuratMasukController::class, 'sendmail']);
+
     Route::prefix('surat-masuk')->group(function () {
         Route::get('', [SuratMasukController::class, 'index']);
         Route::get('create', [SuratMasukController::class, 'create']);
@@ -40,15 +46,15 @@ Route::middleware('auth.any')->group(function () {
     });
     
     Route::prefix('draft')->group(function () {
-        Route::get('', [DraftController::class, 'index'])->middleware('auth.any');
-        Route::get('{draftId}', [DraftController::class, 'show'])->middleware('auth.any');
+        Route::get('', [DraftController::class, 'index']);
+        Route::get('{draftId}', [DraftController::class, 'show']);
         Route::post('{draftId}/konfirmasi', [DraftController::class, 'konfirmasi'])->middleware('auth.pejabat');
         Route::post('', [DraftController::class, 'store'])->middleware('auth.any.pelaksana');
         Route::post('{draftId}/surat-keluar', [SuratKeluarController::class, 'store'])->middleware('auth.tata-usaha');
     });
 
     Route::prefix('surat-keluar')->group(function () {
-        Route::get('create', [SuratKeluarController::class, 'create'])->middleware('auth.any');
+        Route::get('create', [SuratKeluarController::class, 'create']);
         Route::get('', [SuratKeluarController::class, 'index'])->middleware('auth.tata-usaha');
         Route::get('{suratKeluarId}', [SuratKeluarController::class, 'show'])->middleware('auth.tata-usaha');
     });

@@ -14,18 +14,50 @@ class MUserSeeder extends Seeder
      */
     public function run(): void
     {
-        // Ambil semua pejabat
-        $pejabats = MPejabat::all();
+        MUser::factory()->create([
+            'name' => 'Joko Hasan',
+            'email' => 'joko@company.com',
+            'role' => 'Pejabat',
+            'pejabat_id' => MPejabat::where('name', 'Komandan A')->get()->uuid,
+        ]);
 
-        // Pastikan jumlah pejabat sama dengan jumlah pengguna dengan role Pejabat
-        foreach ($pejabats as $pejabat) {
-            MUser::factory()->pejabat($pejabat)->create();
-        }
+        MUser::factory()->create([
+            'name' => 'Budi Santoso',
+            'email' => 'budi@company.com',
+            'role' => 'Pejabat',
+            'pejabat_id' => MPejabat::where('name', 'Kasub A')->get()->uuid,
+        ]);
 
-        // Buat beberapa pengguna tambahan dengan role selain Pejabat
-        MUser::factory()->count(20)->create([
-            'role' => fake()->randomElement(['Tata Usaha', 'Pelaksana']),
-            'pejabat_id' => null,
+        MUser::factory()->create([
+            'name' => 'Agus Salim',
+            'email' => 'agus@company.com',
+            'role' => 'Pejabat',
+            'pejabat_id' => MPejabat::where('name', 'Kabag A')->get()->uuid,
+        ]);
+
+        MUser::factory()->create([
+            'name' => 'Tata usaha',
+            'email' => 'tatausaha@company.com',
+            'role' => 'Tata Usaha',
+        ]);
+
+        MUser::factory()->create([
+            'name' => 'Pelaksana',
+            'email' => 'pelaksana@company.com',
+            'role' => 'Pelaksana',
+            'pejabat_id' => MPejabat::where('name', 'Kabag A')->get()->uuid,
+        ]);
+
+        MUser::factory()->create([
+            'name' => 'Administrator',
+            'email' => 'admin@company.com',
+            'role' => 'Administrator',
+        ]);
+
+        MUser::factory()->create([
+            'name' => 'External',
+            'email' => 'external@company.com',
+            'role' => 'External',
         ]);
     }
 }

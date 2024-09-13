@@ -26,7 +26,7 @@ class MUserFactory extends Factory
             'email' => $this->faker->unique()->safeEmail,
             'role' => $this->faker->randomElement(['Tata Usaha', 'Pejabat', 'Pelaksana']),
             'pejabat_id' => null,
-            'password' => bcrypt('password'), // Default password
+            'password' => bcrypt('password123'), // Default password
             'created_at' => now(),
             'updated_at' => now(),
         ];

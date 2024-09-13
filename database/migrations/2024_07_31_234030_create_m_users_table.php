@@ -14,8 +14,9 @@ return new class extends Migration {
             $table->uuid()->unique()->primary();
             $table->string('name');
             $table->string('email')->unique();
-            $table->enum('role', ['Tata Usaha', 'Pejabat', 'Pelaksana', 'Eksternal', 'Admin']);
+            $table->enum('role', ['Tata Usaha', 'Pejabat', 'Pelaksana', 'Eksternal', 'Administrator']);
             $table->foreignUuid('pejabat_id')->nullable()->references('uuid')->on('m_pejabats');
+            $table->foreignUuid('satminkal_id')->nullable()->references('uuid')->on('satminkals');
             $table->string('password');
             $table->timestamps();
         });

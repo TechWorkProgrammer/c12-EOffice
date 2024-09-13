@@ -21,6 +21,7 @@ class AuthController extends Controller
             'email' => 'required|email|max:255',
             'name' => 'required|string|max:255',
             'pejabat_id' => 'nullable|string|max:255',
+            'satminkal_id' => 'required|string|max:255',
         ]);
 
         $user = MUser::create($validatedData);
