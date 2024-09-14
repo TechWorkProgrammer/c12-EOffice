@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\MPejabat;
+use App\Models\Satminkal;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -21,12 +22,13 @@ class MUserFactory extends Factory
     public function definition()
     {
         return [
-            'uuid' => (string) Str::uuid(),
+            // 'uuid' => (string) Str::uuid(),
             'name' => $this->faker->name,
             'email' => $this->faker->unique()->safeEmail,
             'role' => $this->faker->randomElement(['Tata Usaha', 'Pejabat', 'Pelaksana']),
             'pejabat_id' => null,
             'password' => bcrypt('password123'), // Default password
+            'satminkal_id' => Satminkal::first()->uuid,
             'created_at' => now(),
             'updated_at' => now(),
         ];

@@ -3,7 +3,9 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DisposisiController;
 use App\Http\Controllers\DraftController;
+use App\Http\Controllers\KotamaController;
 use App\Http\Controllers\PejabatController;
+use App\Http\Controllers\SatminkalController;
 use App\Http\Controllers\SuratKeluarController;
 use App\Http\Controllers\SuratMasukController;
 use Illuminate\Support\Facades\Route;
@@ -13,6 +15,17 @@ Route::view('/', "index")->name("home");
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
+
+
+Route::prefix('kotama')->group(function () {
+    Route::get('', [KotamaController::class, 'index']);
+    Route::post('', [KotamaController::class, 'store']);
+});
+
+Route::prefix('satminkal')->group(function () {
+    Route::get('', [SatminkalController::class, 'index']);
+    Route::post('', [SatminkalController::class, 'store']);
+});
 
 Route::prefix('pejabat')->group(function () {
     Route::get('', [PejabatController::class, 'index']);

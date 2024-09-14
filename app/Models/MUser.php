@@ -41,7 +41,7 @@ public function getJWTCustomClaims(): array
     }
 
     protected $fillable = [
-        'uuid', 'name', 'email', 'role', 'pejabat_id', 'password'
+        'name', 'email', 'role', 'pejabat_id', 'satminkal_id', 'password'
     ];
 
     public function pejabat()

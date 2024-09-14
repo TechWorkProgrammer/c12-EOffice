@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('satminkals', function (Blueprint $table) {
             $table->uuid()->unique()->primary();
             $table->string('name');
-            $table->foreignUuid('kotama_id')->nullable()->references('uuid')->on('kotamas');
+            $table->string('kode_kotama');
+            $table->string('kode_satminkal');
+            $table->foreign('kode_kotama')->references('kode')->on('kotamas');
             $table->timestamps();
         });
     }
