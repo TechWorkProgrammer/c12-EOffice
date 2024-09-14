@@ -16,7 +16,6 @@ Route::view('/', "index")->name("home");
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
 
-
 Route::prefix('kotama')->group(function () {
     Route::get('', [KotamaController::class, 'index']);
     Route::post('', [KotamaController::class, 'store'])->middleware('auth.administrator');
@@ -33,31 +32,29 @@ Route::prefix('pejabat')->group(function () {
 });
 
 Route::middleware('auth.any')->group(function () {
-    Route::post('send-mail', [SuratMasukController::class, 'sendmail']);
-
     Route::prefix('surat-masuk')->group(function () {
         Route::get('', [SuratMasukController::class, 'index']);
         Route::get('create', [SuratMasukController::class, 'create']);
         Route::get('{suratMasukId}', [SuratMasukController::class, 'show']);
         Route::patch('{suratMasukId}/read', [SuratMasukController::class, 'read']);
         Route::post('', [SuratMasukController::class, 'store']);
-    
+
         Route::prefix('{suratId}/disposisi')->group(function () {
             Route::post('', [DisposisiController::class, 'store']);
-    
+
             Route::prefix('{diposisiId}')->group(function () {
                 Route::post('', [DisposisiController::class, 'store']);
             });
         });
     });
-    
+
     Route::prefix('disposisi')->group(function () {
         Route::get('create', [DisposisiController::class, 'create']);
         Route::get('{disposisiId}', [DisposisiController::class, 'show']);
         Route::patch('{disposisiId}/read', [DisposisiController::class, 'read']);
         Route::patch('{disposisiId}/done', [DisposisiController::class, 'done']);
     });
-    
+
     Route::prefix('draft')->group(function () {
         Route::get('', [DraftController::class, 'index']);
         Route::get('{draftId}', [DraftController::class, 'show']);
