@@ -19,12 +19,12 @@ Route::post('register', [AuthController::class, 'register']);
 
 Route::prefix('kotama')->group(function () {
     Route::get('', [KotamaController::class, 'index']);
-    Route::post('', [KotamaController::class, 'store']);
+    Route::post('', [KotamaController::class, 'store'])->middleware('auth.administrator');
 });
 
 Route::prefix('satminkal')->group(function () {
     Route::get('', [SatminkalController::class, 'index']);
-    Route::post('', [SatminkalController::class, 'store']);
+    Route::post('', [SatminkalController::class, 'store'])->middleware('auth.administrator');
 });
 
 Route::prefix('pejabat')->group(function () {
