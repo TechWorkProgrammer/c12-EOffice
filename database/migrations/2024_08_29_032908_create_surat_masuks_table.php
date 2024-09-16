@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('file_surat');
             $table->foreignUuid('created_by')->references('uuid')->on('m_users');
             $table->foreignUuid('penerima_id')->references('uuid')->on('m_users');
-            $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
     }

@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Webpatser\Uuid\Uuid;
 
 /**
- * @method static where(string $string, string $string1, $uuid)
+ * @method static where(string $string, mixed $uuid)
+ * @method static create(array $array)
  */
 class LogDisposisi extends Model
 {

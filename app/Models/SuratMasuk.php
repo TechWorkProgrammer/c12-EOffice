@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Webpatser\Uuid\Uuid;
 
 /**
@@ -37,22 +39,27 @@ class SuratMasuk extends Model
         'uuid', 'klasifikasi_surat_id', 'nomor_surat', 'tanggal_surat', 'pengirim', 'perihal', 'file_surat', 'created_by', 'penerima_id', 'read_at'
     ];
 
-    public function klasifikasiSurat()
+    public function klasifikasiSurat(): BelongsTo
     {
         return $this->belongsTo(MKlasifikasiSurat::class, 'klasifikasi_surat_id', 'uuid');
     }
 
-    public function creator()
+    public function userStatus(): HasOne
+    {
+        return $this->hasOne(UserStatus::class, 'surat_masuk_id', 'uuid');
+    }
+
+    public function creator(): BelongsTo
     {
         return $this->belongsTo(MUser::class, 'created_by', 'uuid');
     }
 
-    public function penerima()
+    public function penerima(): BelongsTo
     {
         return $this->belongsTo(MUser::class, 'penerima_id', 'uuid');
     }
 
-    public function disposisi()
+    public function disposisi(): HasOne
     {
         return $this->hasOne(Disposisi::class, 'surat_id', 'uuid');
     }

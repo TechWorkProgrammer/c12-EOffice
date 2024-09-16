@@ -9,6 +9,7 @@ use App\Http\Controllers\SatminkalController;
 use App\Http\Controllers\SuratKeluarController;
 use App\Http\Controllers\SuratMasukController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 
 Route::view('/', "index")->name("home");
@@ -37,7 +38,6 @@ Route::middleware('auth.any')->group(function () {
         Route::get('', [SuratMasukController::class, 'index']);
         Route::get('create', [SuratMasukController::class, 'create']);
         Route::get('{suratMasukId}', [SuratMasukController::class, 'show']);
-        Route::patch('{suratMasukId}/read', [SuratMasukController::class, 'read']);
         Route::post('', [SuratMasukController::class, 'store']);
 
         Route::prefix('{suratId}/disposisi')->group(function () {
@@ -70,3 +70,30 @@ Route::middleware('auth.any')->group(function () {
         Route::get('{suratKeluarId}', [SuratKeluarController::class, 'show'])->middleware('auth.tata-usaha');
     });
 });
+
+Route::get('/storage/surat-masuk/{filename}', function ($filename) {
+    storage_path('app/public/surat-masuk/' . $filename);
+
+    if (!Storage::disk('public')->exists('surat-masuk/' . $filename)) {
+        abort(404);
+    }
+
+    $file = Storage::disk('public')->get('surat-masuk/' . $filename);
+    $type = Storage::disk('public')->mimeType('surat-masuk/' . $filename);
+
+    return response($file, 200)->header('Content-Type', $type);
+});
+
+Route::get('/storage/tanda-tangan/{filename}', function ($filename) {
+    storage_path('app/public/tanda-tangan/' . $filename);
+
+    if (!Storage::disk('public')->exists('tanda-tangan/' . $filename)) {
+        abort(404);
+    }
+
+    $file = Storage::disk('public')->get('tanda-tangan/' . $filename);
+    $type = Storage::disk('public')->mimeType('tanda-tangan/' . $filename);
+
+    return response($file, 200)->header('Content-Type', $type);
+});
+

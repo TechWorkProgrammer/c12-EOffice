@@ -12,6 +12,7 @@ use Webpatser\Uuid\Uuid;
 /**
  * @method static create(array $validatedData)
  * @method static inRandomOrder()
+ * @method static where(string $string, string $string1)
  * @property mixed $uuid
  * @property mixed $role
  * @property mixed $pejabat

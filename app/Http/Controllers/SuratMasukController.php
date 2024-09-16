@@ -5,15 +5,14 @@ namespace App\Http\Controllers;
 use App\Helpers\AuthHelper;
 use App\Helpers\CommonHelper;
 use App\Helpers\ResponseHelper;
-use App\Mail\SuratMasukNotification;
 use App\Models\LogDisposisi;
 use App\Models\MKlasifikasiSurat;
 use App\Models\MUser;
 use App\Models\SuratMasuk;
+use App\Models\UserStatus;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class SuratMasukController extends Controller
@@ -21,59 +20,104 @@ class SuratMasukController extends Controller
     public function index(): JsonResponse
     {
         $userLogin = AuthHelper::getAuthenticatedUser();
+        $suratMasuks = SuratMasuk::with(['creator', 'penerima', 'klasifikasiSurat']);
 
-        $datas = SuratMasuk::all();
+        $datas = [];
 
         switch ($userLogin->role) {
             case 'Pejabat':
-                $datas = $datas->where('penerima_id', '=', $userLogin->uuid)->values()->toArray();
+                $datas = $suratMasuks->where('penerima_id', $userLogin->uuid)->get();
 
-                if ($userLogin->pejabat->atasan_id != null) {
-                    $logDisposisis = LogDisposisi::where('penerima', '=', $userLogin->uuid)->get();
+                if ($userLogin->pejabat->atasan_id !== null) {
+                    $logDisposisis = LogDisposisi::where('penerima', $userLogin->uuid)->get();
 
                     foreach ($logDisposisis as $logDisposisi) {
-                        $datas[] = $logDisposisi->disposisi->suratMasuk;
+                        $suratMasuk = $logDisposisi->disposisi->suratMasuk;
+                        if ($suratMasuk) {
+                            $suratMasuk->load(['creator', 'penerima', 'klasifikasiSurat']);
+
+                            $userStatus = UserStatus::firstOrCreate(
+                                ['user_id' => $userLogin->uuid, 'surat_masuk_id' => $suratMasuk->uuid],
+                                ['read_at' => null, 'pelaksanaan_at' => null]
+                            );
+
+                            $suratMasuk->setRelation('userStatus', $userStatus);
+                            $datas[] = $suratMasuk->toArray();
+                        }
+                    }
+                } else {
+                    foreach ($datas as $suratMasuk) {
+                        $userStatus = UserStatus::firstOrCreate(
+                            ['user_id' => $userLogin->uuid, 'surat_masuk_id' => $suratMasuk->uuid],
+                            ['read_at' => null, 'pelaksanaan_at' => null]
+                        );
+                        $suratMasuk->setRelation('userStatus', $userStatus);
                     }
                 }
                 break;
 
             case 'Pelaksana':
-                $datas = [];
-                $logDisposisis = LogDisposisi::where('penerima', '=', $userLogin->uuid)->get();
+                $logDisposisis = LogDisposisi::where('penerima', $userLogin->uuid)->get();
 
                 foreach ($logDisposisis as $logDisposisi) {
-                    $datas[] = $logDisposisi->disposisi->suratMasuk;
+                    $suratMasuk = $logDisposisi->disposisi->suratMasuk;
+                    if ($suratMasuk) {
+                        $suratMasuk->load(['creator', 'penerima', 'klasifikasiSurat']);
+                        $userStatus = UserStatus::firstOrCreate(
+                            ['user_id' => $userLogin->uuid, 'surat_masuk_id' => $suratMasuk->uuid],
+                            ['read_at' => null, 'pelaksanaan_at' => null]
+                        );
+
+                        $suratMasuk->setRelation('userStatus', $userStatus);
+                        $datas[] = $suratMasuk->toArray();
+                    }
                 }
+                break;
+
+            default:
+                $datas = $suratMasuks->get();
+                foreach ($datas as $suratMasuk) {
+                    $userStatus = UserStatus::firstOrCreate(
+                        ['user_id' => $userLogin->uuid, 'surat_masuk_id' => $suratMasuk->uuid],
+                        ['read_at' => null, 'pelaksanaan_at' => null]
+                    );
+                    $suratMasuk->setRelation('userStatus', $userStatus);
+                }
+                $datas = $datas->toArray();
                 break;
         }
 
         return ResponseHelper::Success('surat masuk retrieved successfully', $datas);
     }
 
+
     public function create(): JsonResponse
     {
         $userHasil = [];
-        $userPejabats = MUser::all()->where('role', '=', 'Pejabat');
+        $userPejabats = MUser::where('role', 'Pejabat')->get();
+
         foreach ($userPejabats as $userPejabat) {
             if ($userPejabat->pejabat->atasan_id != null) {
                 continue;
             }
+
             $userHasil[] = [
                 'uuid' => $userPejabat->uuid,
                 'name' => $userPejabat->name,
-                'jabatan' => $userPejabat->pejabat->name,
+                'jabatan' => $userPejabat->pejabat->name ?? 'N/A',
                 'level_jabatan' => 1,
             ];
 
             foreach ($userPejabat->pejabat->bawahans as $bawahan) {
                 $userHasil[] = [
-                    'uuid' => $userPejabat->uuid,
+                    'uuid' => $bawahan->user->uuid,
                     'name' => $bawahan->user->name,
-                    'jabatan' => $bawahan->user->pejabat->name,
+                    'jabatan' => $bawahan->user->pejabat->name ?? 'N/A',
                     'level_jabatan' => 2,
                 ];
             }
         }
+
         $datas = [
             'classifications' => MKlasifikasiSurat::all(),
             'users' => $userHasil
@@ -81,6 +125,7 @@ class SuratMasukController extends Controller
 
         return ResponseHelper::Success('data for create surat masuk retrieved successfully', $datas);
     }
+
 
     public function store(Request $request): JsonResponse
     {
@@ -106,13 +151,25 @@ class SuratMasukController extends Controller
 
         $suratMasuk = SuratMasuk::create($validatedData);
 
-        Mail::to($suratMasuk->penerima->email)->send(new SuratMasukNotification($userLogin->name, $suratMasuk));
+        //Mail::to($suratMasuk->penerima->email)->send(new SuratMasukNotification($userLogin->name, $suratMasuk));
 
         return ResponseHelper::Created('Surat Masuk created successfully', $suratMasuk);
     }
 
     public function show(SuratMasuk $suratMasukId): JsonResponse
     {
+        $userLogin = AuthHelper::getAuthenticatedUser();
+
+        $userStatus = UserStatus::firstOrCreate(
+            ['user_id' => $userLogin->uuid, 'surat_masuk_id' => $suratMasukId->uuid],
+            ['read_at' => null, 'pelaksanaan_at' => null]
+        );
+
+        if (is_null($userStatus->read_at)) {
+            $userStatus->read_at = now();
+            $userStatus->save();
+        }
+
         $datas = $suratMasukId->with([
             'disposisi' => function ($query) {
                 $query->where('disposisi_asal', null)->with([
@@ -139,17 +196,9 @@ class SuratMasukController extends Controller
             'creator',
             'penerima.pejabat',
         ])->find($suratMasukId->uuid);
+
+        $datas["user_status"] = $userStatus;
         return ResponseHelper::Success('data for surat masuk retrieved successfully', $datas);
-    }
-
-    public function read(SuratMasuk $suratMasukId): JsonResponse
-    {
-        $userLogin = AuthHelper::getAuthenticatedUser();
-
-        $suratMasukId = $suratMasukId->where('penerima_id', $userLogin->uuid)->first();
-        $suratMasukId->read_at = now();
-        $suratMasukId->save();
-        return ResponseHelper::Success('update read at successfully', $suratMasukId);
     }
 
     public function generateNoSuratMasuk($klasifikasiId): string
