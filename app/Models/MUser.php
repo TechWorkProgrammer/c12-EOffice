@@ -3,11 +3,20 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Webpatser\Uuid\Uuid;
 
+/**
+ * @method static create(array $validatedData)
+ * @method static inRandomOrder()
+ * @property mixed $uuid
+ * @property mixed $role
+ * @property mixed $pejabat
+ * @property mixed $name
+ */
 class MUser extends Authenticatable implements JWTSubject
 {
     use HasFactory;
@@ -26,7 +35,7 @@ class MUser extends Authenticatable implements JWTSubject
         return $this->uuid;
     }
 
-public function getJWTCustomClaims(): array
+    public function getJWTCustomClaims(): array
     {
         return [];
     }
@@ -44,22 +53,22 @@ public function getJWTCustomClaims(): array
         'name', 'email', 'role', 'pejabat_id', 'satminkal_id', 'password'
     ];
 
-    public function pejabat()
+    public function pejabat(): BelongsTo
     {
         return $this->belongsTo(MPejabat::class, 'pejabat_id', 'uuid');
     }
 
-    public function suratMasuks()
+    public function suratMasuks(): HasMany
     {
         return $this->hasMany(SuratMasuk::class, 'created_by', 'id');
     }
 
-    public function disposisis()
+    public function disposisis(): HasMany
     {
         return $this->hasMany(Disposisi::class, 'created_by', 'id');
     }
 
-    public function logDisposisis()
+    public function logDisposisis(): HasMany
     {
         return $this->hasMany(LogDisposisi::class, 'pengirim', 'id');
     }

@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\MPejabat;
 use App\Models\MUser;
 use App\Models\Satminkal;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class MUserSeeder extends Seeder

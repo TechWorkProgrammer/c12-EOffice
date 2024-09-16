@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Webpatser\Uuid\Uuid;
 
+/**
+ * @method static where(string $string, string $string1)
+ */
 class MPejabat extends Model
 {
     use HasFactory;

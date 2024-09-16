@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Webpatser\Uuid\Uuid;
 
+/**
+ * @method static findOrFail($klasifikasiId)
+ * @method static inRandomOrder()
+ */
 class MKlasifikasiSurat extends Model
 {
     use HasFactory;

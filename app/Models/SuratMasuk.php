@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Webpatser\Uuid\Uuid;
 
+/**
+ * @method static where(string $string, $klasifikasiId)
+ * @method static create(array $validatedData)
+ * @property mixed $uuid
+ */
 class SuratMasuk extends Model
 {
     use HasFactory;

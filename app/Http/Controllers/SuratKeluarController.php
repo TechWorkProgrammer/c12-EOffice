@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CommonHelper;
 use App\Helpers\ResponseHelper;
 use App\Models\Draft;
 use App\Models\Ekspedisi;
@@ -39,13 +40,13 @@ class SuratKeluarController extends Controller
     {
         try {
             $userLogin = Auth::guard('api')->user();
-    
+
             $validatedData = $request->validate([
                 'klasifikasi_surat_id' => 'required|exists:m_klasifikasi_surats,uuid',
                 'tujuan' => 'required|string|max:255',
                 'name' => 'required|string|max:255'
             ]);
-    
+
             $suratKeluar = SuratKeluar::create([
                 'nomor_surat' => SuratKeluarController::generateNoSuratKeluar($validatedData['klasifikasi_surat_id']),
                 'klasifikasi_surat_id' => $validatedData['klasifikasi_surat_id'],
@@ -56,7 +57,7 @@ class SuratKeluarController extends Controller
                 'tujuan' => $validatedData['tujuan'],
                 'created_by' => $userLogin->uuid
             ]);
-    
+
             Ekspedisi::create([
                 'name' => $validatedData['name'],
                 'surat_keluar_id' => $suratKeluar->uuid
@@ -64,7 +65,7 @@ class SuratKeluarController extends Controller
 
             $draftId->status = 'Terkirim';
             $draftId->save();
-    
+
             return ResponseHelper::Created('Surat Keluar created successfully');
         } catch (\Exception $e) {
             return ResponseHelper::InternalServerError($e->getMessage());
@@ -105,53 +106,23 @@ class SuratKeluarController extends Controller
         //
     }
 
-    public function generateNoSuratKeluar($klasifikasiId)
+    public function generateNoSuratKeluar($klasifikasiId): string
     {
-        // Ambil nama klasifikasi surat berdasarkan ID
         $klasifikasi = MKlasifikasiSurat::findOrFail($klasifikasiId);
         $namaKlasifikasi = $klasifikasi->name;
 
-        // Ambil tahun dan bulan sekarang
         $tahunSekarang = Carbon::now()->year;
-        $bulanSekarang = Carbon::now()->format('n'); // Menggunakan format angka untuk bulan
+        $bulanSekarang = Carbon::now()->format('n');
 
-        // Ambil jumlah surat Keluar untuk klasifikasi ini pada tahun ini
         $jumlahSuratTahunIni = SuratKeluar::where('klasifikasi_surat_id', $klasifikasiId)
             ->whereYear('created_at', $tahunSekarang)
             ->count();
 
-        // Tambahkan 1 untuk mendapatkan urutan surat Keluar selanjutnya
         $nomorUrutSurat = $jumlahSuratTahunIni + 1;
 
-        // Ubah bulan ke format Romawi
-        $bulanRomawi = SuratKeluarController::toRomanNumeral($bulanSekarang);
+        $bulanRomawi = CommonHelper::toRomanNumeral($bulanSekarang);
 
-        // Format nomor surat sesuai dengan ketentuan
-        $noSurat = sprintf("SK/%s/%d/%s/%d", $namaKlasifikasi, $nomorUrutSurat, $bulanRomawi, $tahunSekarang);
-
-        return $noSurat;
+        return sprintf("SK/%s/%d/%s/%d", $namaKlasifikasi, $nomorUrutSurat, $bulanRomawi, $tahunSekarang);
     }
 
-    public function toRomanNumeral($number)
-    {
-        $map = [
-            'XL' => 40,
-            'X' => 10,
-            'IX' => 9,
-            'V' => 5,
-            'IV' => 4,
-            'I' => 1
-        ];
-        $returnValue = '';
-        while ($number > 0) {
-            foreach ($map as $roman => $value) {
-                if ($number >= $value) {
-                    $number -= $value;
-                    $returnValue .= $roman;
-                    break;
-                }
-            }
-        }
-        return $returnValue;
-    }
 }

@@ -15,6 +15,7 @@ Route::view('/', "index")->name("home");
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
+Route::post('logout', [AuthController::class, 'logout']);
 
 Route::prefix('kotama')->group(function () {
     Route::get('', [KotamaController::class, 'index']);

@@ -2,43 +2,37 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\AuthHelper;
+use App\Helpers\CommonHelper;
 use App\Helpers\ResponseHelper;
 use App\Mail\SuratMasukNotification;
-use App\Models\Disposisi;
 use App\Models\LogDisposisi;
 use App\Models\MKlasifikasiSurat;
 use App\Models\MUser;
 use App\Models\SuratMasuk;
 use Carbon\Carbon;
-use Illuminate\Foundation\Auth\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class SuratMasukController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-
-    public function index()
+    public function index(): JsonResponse
     {
-        $userLogin = Auth::guard('api')->user();
+        $userLogin = AuthHelper::getAuthenticatedUser();
 
         $datas = SuratMasuk::all();
 
         switch ($userLogin->role) {
             case 'Pejabat':
-                // apabila surat masuk langsung ditujukan ke pejabat
                 $datas = $datas->where('penerima_id', '=', $userLogin->uuid)->values()->toArray();
 
-                // pejabat menerima disposisi bukan langsung dari surat masuk
                 if ($userLogin->pejabat->atasan_id != null) {
                     $logDisposisis = LogDisposisi::where('penerima', '=', $userLogin->uuid)->get();
 
                     foreach ($logDisposisis as $logDisposisi) {
-                        array_push($datas, $logDisposisi->disposisi->suratMasuk);
+                        $datas[] = $logDisposisi->disposisi->suratMasuk;
                     }
                 }
                 break;
@@ -48,7 +42,7 @@ class SuratMasukController extends Controller
                 $logDisposisis = LogDisposisi::where('penerima', '=', $userLogin->uuid)->get();
 
                 foreach ($logDisposisis as $logDisposisi) {
-                    array_push($datas, $logDisposisi->disposisi->suratMasuk);
+                    $datas[] = $logDisposisi->disposisi->suratMasuk;
                 }
                 break;
         }
@@ -56,81 +50,68 @@ class SuratMasukController extends Controller
         return ResponseHelper::Success('surat masuk retrieved successfully', $datas);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function create(): JsonResponse
     {
         $userHasil = [];
-        $userPejabats  = MUser::all()->where('role', '=', 'Pejabat');
+        $userPejabats = MUser::all()->where('role', '=', 'Pejabat');
         foreach ($userPejabats as $userPejabat) {
             if ($userPejabat->pejabat->atasan_id != null) {
                 continue;
             }
-            array_push($userHasil, [
+            $userHasil[] = [
                 'uuid' => $userPejabat->uuid,
                 'name' => $userPejabat->name,
                 'jabatan' => $userPejabat->pejabat->name,
                 'level_jabatan' => 1,
-            ]);
+            ];
 
             foreach ($userPejabat->pejabat->bawahans as $bawahan) {
-                array_push($userHasil, [
+                $userHasil[] = [
                     'uuid' => $userPejabat->uuid,
                     'name' => $bawahan->user->name,
                     'jabatan' => $bawahan->user->pejabat->name,
                     'level_jabatan' => 2,
-                ]);
+                ];
             }
         }
         $datas = [
-            'm_klasifikasi_surats' => MKlasifikasiSurat::all(),
-            'penerimas' => $userHasil
+            'classifications' => MKlasifikasiSurat::all(),
+            'users' => $userHasil
         ];
 
         return ResponseHelper::Success('data for create surat masuk retrieved successfully', $datas);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        try {
-            $userLogin = Auth::guard('api')->user();
+        $userLogin = AuthHelper::getAuthenticatedUser();
 
-            $validatedData = $request->validate([
-                'klasifikasi_surat_id' => 'required|exists:m_klasifikasi_surats,uuid',
-                'tanggal_surat' => 'required|date',
-                'pengirim' => 'required|string|max:255',
-                'perihal' => 'required|string|max:255',
-                'file_surat' => 'required|file|mimes:pdf',
-                'penerima_id' => 'required|exists:m_users,uuid',
-            ]);
+        $validatedData = $request->validate([
+            'klasifikasi_surat_id' => 'required|exists:m_klasifikasi_surats,uuid',
+            'tanggal_surat' => 'required|date',
+            'pengirim' => 'required|string|max:255',
+            'perihal' => 'required|string|max:255',
+            'file_surat' => 'required|file|mimes:pdf',
+            'penerima_id' => 'required|exists:m_users,uuid',
+        ]);
 
-            if ($request->hasFile('file_surat')) {
-                $path = $request->file('file_surat')->store('public/surat-masuk');
+        if ($request->hasFile('file_surat')) {
+            $path = $request->file('file_surat')->store('public/surat-masuk');
 
-                $validatedData['file_surat'] = env('APP_URL') . Storage::url($path);
-            }
-
-            $validatedData['nomor_surat'] = SuratMasukController::generateNoSuratMasuk($request->klasifikasi_surat_id);
-            $validatedData['created_by'] = $userLogin->uuid;
-
-            $suratMasuk = SuratMasuk::create($validatedData);
-
-            Mail::to($suratMasuk->penerima->email)->send(new SuratMasukNotification($userLogin->name, $suratMasuk));
-
-            return ResponseHelper::Created('Surat Masuk created successfully', $suratMasuk);
-        } catch (\Exception $e) {
-            return ResponseHelper::InternalServerError($e->getMessage());
+            $validatedData['file_surat'] = env('APP_URL') . Storage::url($path);
         }
+
+        $validatedData['nomor_surat'] = SuratMasukController::generateNoSuratMasuk($request["klasifikasi_surat_id"]);
+        $validatedData['created_by'] = $userLogin->uuid;
+
+        $suratMasuk = SuratMasuk::create($validatedData);
+
+        Mail::to($suratMasuk->penerima->email)->send(new SuratMasukNotification($userLogin->name, $suratMasuk));
+
+        return ResponseHelper::Created('Surat Masuk created successfully', $suratMasuk);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(SuratMasuk $suratMasukId)
+    public function show(SuratMasuk $suratMasukId): JsonResponse
     {
         $datas = $suratMasukId->with([
             'disposisi' => function ($query) {
@@ -161,33 +142,9 @@ class SuratMasukController extends Controller
         return ResponseHelper::Success('data for surat masuk retrieved successfully', $datas);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function read(SuratMasuk $suratMasukId): JsonResponse
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
-    public function read(SuratMasuk $suratMasukId)
-    {
-        $userLogin = Auth::guard('api')->user();
+        $userLogin = AuthHelper::getAuthenticatedUser();
 
         $suratMasukId = $suratMasukId->where('penerima_id', $userLogin->uuid)->first();
         $suratMasukId->read_at = now();
@@ -195,53 +152,21 @@ class SuratMasukController extends Controller
         return ResponseHelper::Success('update read at successfully', $suratMasukId);
     }
 
-    public function generateNoSuratMasuk($klasifikasiId)
+    public function generateNoSuratMasuk($klasifikasiId): string
     {
-        // Ambil nama klasifikasi surat berdasarkan ID
         $klasifikasi = MKlasifikasiSurat::findOrFail($klasifikasiId);
         $namaKlasifikasi = $klasifikasi->name;
 
-        // Ambil tahun dan bulan sekarang
         $tahunSekarang = Carbon::now()->year;
-        $bulanSekarang = Carbon::now()->format('n'); // Menggunakan format angka untuk bulan
+        $bulanSekarang = Carbon::now()->format('n');
 
-        // Ambil jumlah surat masuk untuk klasifikasi ini pada tahun ini
         $jumlahSuratTahunIni = SuratMasuk::where('klasifikasi_surat_id', $klasifikasiId)
             ->whereYear('tanggal_surat', $tahunSekarang)
             ->count();
 
-        // Tambahkan 1 untuk mendapatkan urutan surat masuk selanjutnya
         $nomorUrutSurat = $jumlahSuratTahunIni + 1;
 
-        // Ubah bulan ke format Romawi
-        $bulanRomawi = SuratMasukController::toRomanNumeral($bulanSekarang);
-
-        // Format nomor surat sesuai dengan ketentuan
-        $noSurat = sprintf("SM/%s/%d/%s/%d", $namaKlasifikasi, $nomorUrutSurat, $bulanRomawi, $tahunSekarang);
-
-        return $noSurat;
-    }
-
-    public function toRomanNumeral($number)
-    {
-        $map = [
-            'XL' => 40,
-            'X' => 10,
-            'IX' => 9,
-            'V' => 5,
-            'IV' => 4,
-            'I' => 1
-        ];
-        $returnValue = '';
-        while ($number > 0) {
-            foreach ($map as $roman => $value) {
-                if ($number >= $value) {
-                    $number -= $value;
-                    $returnValue .= $roman;
-                    break;
-                }
-            }
-        }
-        return $returnValue;
+        $bulanRomawi = CommonHelper::toRomanNumeral($bulanSekarang);
+        return sprintf("SM/%s/%d/%s/%d", $namaKlasifikasi, $nomorUrutSurat, $bulanRomawi, $tahunSekarang);
     }
 }
