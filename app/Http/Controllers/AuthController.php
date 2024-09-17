@@ -45,7 +45,10 @@ class AuthController extends Controller
         if (!$token = Auth::guard('api')->attempt($credentials)) {
             return ResponseHelper::Unauthorized('Email tidak terdaftar atau Password Salah');
         }
-        return ResponseHelper::Success('login successful', ['user' => Auth::guard('api')->user(), 'token' => $token]);
+
+
+        $userInfo = MUser::with('pejabat')->find(Auth::guard('api')->user()->uuid);
+        return ResponseHelper::Success('login successful', ['user' => $userInfo, 'token' => $token]);
     }
 
     public function logout(): JsonResponse

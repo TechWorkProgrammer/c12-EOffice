@@ -38,6 +38,7 @@ Route::middleware('auth.any')->group(function () {
         Route::get('', [SuratMasukController::class, 'index']);
         Route::get('create', [SuratMasukController::class, 'create']);
         Route::get('{suratMasukId}', [SuratMasukController::class, 'show']);
+        Route::put('{suratMasukId}/done', [SuratMasukController::class, 'done'])->middleware('auth.any.pelaksana');
         Route::post('', [SuratMasukController::class, 'store']);
 
         Route::prefix('{suratId}/disposisi')->group(function () {
@@ -50,7 +51,7 @@ Route::middleware('auth.any')->group(function () {
     });
 
     Route::prefix('disposisi')->group(function () {
-        Route::get('create', [DisposisiController::class, 'create']);
+        Route::get('create', [DisposisiController::class, 'create'])->middleware('auth.pejabat');
         Route::get('{disposisiId}', [DisposisiController::class, 'show']);
         Route::patch('{disposisiId}/read', [DisposisiController::class, 'read']);
         Route::patch('{disposisiId}/done', [DisposisiController::class, 'done']);

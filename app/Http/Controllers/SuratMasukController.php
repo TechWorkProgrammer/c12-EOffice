@@ -198,7 +198,17 @@ class SuratMasukController extends Controller
         ])->find($suratMasukId->uuid);
 
         $datas["user_status"] = $userStatus;
+        $datas["log_status"] = UserStatus::where('surat_masuk_id', $suratMasukId->uuid)->get();
         return ResponseHelper::Success('data for surat masuk retrieved successfully', $datas);
+    }
+
+    public function done(SuratMasuk $suratMasukId) {
+        $userLogin = AuthHelper::getAuthenticatedUser();
+
+        $userStatus =  UserStatus::where('surat_masuk_id', $suratMasukId->uuid)->where('user_id', $userLogin->uuid)->first();
+        $userStatus->update(['pelaksanaan_at' => now()]);
+
+        return ResponseHelper::Success('mark as done successfully', $userStatus);
     }
 
     public function generateNoSuratMasuk($klasifikasiId): string
