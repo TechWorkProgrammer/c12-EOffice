@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\SuratMasuk;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -18,12 +19,12 @@ class SuratMasukNotification extends Mailable
      * Create a new message instance.
      */
 
-    public $pengirim;
-    public $suratMasuk;
-     
-    public function __construct($pengirim, $suratMasuk)
+    public String $namaPengirim;
+    public SuratMasuk $suratMasuk;
+
+    public function __construct(String $namaPengirim, SuratMasuk $suratMasuk)
     {
-        $this->pengirim = $pengirim;
+        $this->namaPengirim = $namaPengirim;
         $this->suratMasuk = $suratMasuk;
     }
 
@@ -33,7 +34,7 @@ class SuratMasukNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address('sparti.office@gmail.com', $this->pengirim),
+            from: new Address('sparti.office@gmail.com', $this->namaPengirim),
             subject: 'Notifikasi Surat Masuk',
         );
     }

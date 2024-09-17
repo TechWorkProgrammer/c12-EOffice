@@ -53,8 +53,8 @@
         <p><strong>Perihal</strong>: {{ $suratMasuk->perihal }}</p> --}}
 
         <p><strong>Kepada Yth.</strong></p>
-        <p>Bpk. {{ $penerima->name }}<br>
-        <p>{{ $penerima->pejabat->name }}<br>
+        <p>Bpk. {{ $pengajuan->penerima->name }}<br>
+        <p>{{ $pengajuan->penerima->pejabat->name }}<br>
         <p>Markas Besar Angkatan Darat</p>
         <p>Tentara Nasional Indonesia</p>
         <br>
@@ -79,9 +79,9 @@
         <br>
         <div class="">
             <p>Hormat kami,</p>
-            <p>{{ $pengajuan->creator->name }}</p>
+            <p>{{ $pengajuan->draft->creator->name }}</p>
             {{-- <p>[NIP]</p> --}}
-            <p>{{ $pengajuan->creator->role }}</p>
+            <p>{{ $pengajuan->draft->creator->role }}</p>
             <p>Markas Besar Angkatan Darat</p>
             <p>Tentara Nasional Indonesia</p>
         </div>

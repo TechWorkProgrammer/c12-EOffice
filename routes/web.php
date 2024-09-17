@@ -39,6 +39,7 @@ Route::middleware('auth.any')->group(function () {
         Route::get('create', [SuratMasukController::class, 'create']);
         Route::get('{suratMasukId}', [SuratMasukController::class, 'show']);
         Route::put('{suratMasukId}/done', [SuratMasukController::class, 'done'])->middleware('auth.any.pelaksana');
+        Route::post('{suratMasukId}/send-mail', [SuratMasukController::class, 'sendMail']);
         Route::post('', [SuratMasukController::class, 'store']);
 
         Route::prefix('{suratId}/disposisi')->group(function () {
@@ -64,6 +65,8 @@ Route::middleware('auth.any')->group(function () {
         Route::post('', [DraftController::class, 'store'])->middleware('auth.any.pelaksana');
         Route::post('{draftId}/surat-keluar', [SuratKeluarController::class, 'store'])->middleware('auth.tata-usaha');
     });
+
+    Route::post('pengajuan/{pengajuanId}/send-mail', [DraftController::class, 'sendPengajuanMail']);
 
     Route::prefix('surat-keluar')->group(function () {
         Route::get('create', [SuratKeluarController::class, 'create']);

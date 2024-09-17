@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Pengajuan;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -17,14 +18,12 @@ class PengajuanNotification extends Mailable
     /**
      * Create a new message instance.
      */
-    public $pengirim;
-    public $penerima;
-    public $pengajuan;
-     
-    public function __construct($pengirim, $penerima, $pengajuan)
+    public String $pengirim;
+    public Pengajuan $pengajuan;
+
+    public function __construct(String $pengirim, Pengajuan $pengajuan)
     {
         $this->pengirim = $pengirim;
-        $this->penerima = $penerima;
         $this->pengajuan = $pengajuan;
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\AuthHelper;
 use App\Helpers\ResponseHelper;
 use App\Mail\PengajuanNotification;
 use App\Models\Draft;
@@ -19,7 +20,7 @@ class DraftController extends Controller
     public function index()
     {
         $userLogin = Auth::guard('api')->user();
-        
+
         switch ($userLogin->role) {
             case 'Tata Usaha':
                 $datas = Draft::all();
@@ -29,7 +30,7 @@ class DraftController extends Controller
             case 'Pelaksana':
                 $datas = Draft::where('created_by', $userLogin->uuid)->get();
                 break;
-            
+
             case 'Pejabat':
                 $datas = [];
                 $pengajuans = Pengajuan::where('penerima_id', $userLogin->uuid)->get();
@@ -117,13 +118,13 @@ class DraftController extends Controller
             $penerima = $userLogin->pejabat->atasan;
 
             if (isset($penerima)) {
-                $draftPengajuan = Pengajuan::create([
+                $pengajuanBaru = Pengajuan::create([
                     'draft_id' => $draftId->uuid,
                     'penerima_id' => $penerima->user->uuid,
                     'pengajuan_asal' => $pengajuan->uuid
                 ]);
 
-                Mail::to($penerima->user->email)->send(new PengajuanNotification($userLogin->name, $penerima->user, $draftPengajuan));
+                // Mail::to($penerima->user->email)->send(new PengajuanNotification($userLogin->name, $penerima->user, $pengajuanBaru));
 
             }else {
                 $draftStatus = $pengajuan->status == 'Diterima' ? 'Diterima' : 'Ditolak';
@@ -142,7 +143,7 @@ class DraftController extends Controller
     public function show(Draft $draftId)
     {
         $datas = $draftId->with([
-            'creator', 
+            'creator',
             'pengajuanLevel1.penerima',
             'pengajuanLevel1.pengajuanLevel2.penerima',
             'pengajuanLevel1.pengajuanLevel2.pengajuanLevel3.penerima',
@@ -183,5 +184,17 @@ class DraftController extends Controller
         $pengajuan->save();
 
         return ResponseHelper::Success('update read at successfully');
+    }
+
+    public function sendPengajuanMail(Request $request, Pengajuan $pengajuanId) {
+        $userLogin = AuthHelper::getAuthenticatedUser();
+
+        $validatedData = $request->validate([
+            'email_penerima' => 'required|email',
+        ]);
+
+        Mail::to($validatedData['email_penerima'])->send(new PengajuanNotification($userLogin->name, $pengajuanId));
+
+        return ResponseHelper::Success('send mail successfully');
     }
 }

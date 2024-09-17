@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\AuthHelper;
 use App\Helpers\CommonHelper;
 use App\Helpers\ResponseHelper;
+use App\Mail\SuratMasukNotification;
 use App\Models\LogDisposisi;
 use App\Models\MKlasifikasiSurat;
 use App\Models\MUser;
@@ -13,6 +14,7 @@ use App\Models\UserStatus;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class SuratMasukController extends Controller
@@ -209,6 +211,14 @@ class SuratMasukController extends Controller
         $userStatus->update(['pelaksanaan_at' => now()]);
 
         return ResponseHelper::Success('mark as done successfully', $userStatus);
+    }
+
+    public function sendMail(SuratMasuk $suratMasukId) {
+        $userLogin = AuthHelper::getAuthenticatedUser();
+
+        Mail::to($suratMasukId->penerima->email)->send(new SuratMasukNotification($userLogin->name, $suratMasukId));
+
+        return ResponseHelper::Success('send mail successfully');
     }
 
     public function generateNoSuratMasuk($klasifikasiId): string
