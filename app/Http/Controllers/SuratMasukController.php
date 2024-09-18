@@ -20,14 +20,14 @@ class SuratMasukController extends Controller
     public function index(): JsonResponse
     {
         $userLogin = AuthHelper::getAuthenticatedUser();
-        $suratMasuks = SuratMasuk::with(['creator', 'penerima', 'klasifikasiSurat']);
-
         $datas = [];
+        $suratMasuksQuery = SuratMasuk::with(['creator', 'penerima', 'klasifikasiSurat', 'userStatus' => function ($query) use ($userLogin) {
+            $query->where('user_id', $userLogin->uuid);
+        }]);
 
         switch ($userLogin->role) {
             case 'Pejabat':
-                $datas = $suratMasuks->where('penerima_id', $userLogin->uuid)->get();
-
+                $datas = $suratMasuksQuery->where('penerima_id', $userLogin->uuid)->get();
                 if ($userLogin->pejabat->atasan_id !== null) {
                     $logDisposisis = LogDisposisi::where('penerima', $userLogin->uuid)->get();
 
@@ -35,59 +35,40 @@ class SuratMasukController extends Controller
                         $suratMasuk = $logDisposisi->disposisi->suratMasuk;
                         if ($suratMasuk) {
                             $suratMasuk->load(['creator', 'penerima', 'klasifikasiSurat']);
-
-                            $userStatus = UserStatus::firstOrCreate(
-                                ['user_id' => $userLogin->uuid, 'surat_masuk_id' => $suratMasuk->uuid],
-                                ['read_at' => null, 'pelaksanaan_at' => null]
-                            );
-
-                            $suratMasuk->setRelation('userStatus', $userStatus);
-                            $datas[] = $suratMasuk->toArray();
+                            $datas[] = $suratMasuk;
                         }
-                    }
-                } else {
-                    foreach ($datas as $suratMasuk) {
-                        $userStatus = UserStatus::firstOrCreate(
-                            ['user_id' => $userLogin->uuid, 'surat_masuk_id' => $suratMasuk->uuid],
-                            ['read_at' => null, 'pelaksanaan_at' => null]
-                        );
-                        $suratMasuk->setRelation('userStatus', $userStatus);
                     }
                 }
                 break;
 
             case 'Pelaksana':
                 $logDisposisis = LogDisposisi::where('penerima', $userLogin->uuid)->get();
-
                 foreach ($logDisposisis as $logDisposisi) {
                     $suratMasuk = $logDisposisi->disposisi->suratMasuk;
                     if ($suratMasuk) {
                         $suratMasuk->load(['creator', 'penerima', 'klasifikasiSurat']);
-                        $userStatus = UserStatus::firstOrCreate(
-                            ['user_id' => $userLogin->uuid, 'surat_masuk_id' => $suratMasuk->uuid],
-                            ['read_at' => null, 'pelaksanaan_at' => null]
-                        );
-
-                        $suratMasuk->setRelation('userStatus', $userStatus);
-                        $datas[] = $suratMasuk->toArray();
+                        $datas[] = $suratMasuk;
                     }
                 }
                 break;
-
             default:
-                $datas = $suratMasuks->get();
-                foreach ($datas as $suratMasuk) {
-                    $userStatus = UserStatus::firstOrCreate(
-                        ['user_id' => $userLogin->uuid, 'surat_masuk_id' => $suratMasuk->uuid],
-                        ['read_at' => null, 'pelaksanaan_at' => null]
-                    );
-                    $suratMasuk->setRelation('userStatus', $userStatus);
-                }
-                $datas = $datas->toArray();
+                $datas = $suratMasuksQuery->get();
                 break;
         }
 
-        return ResponseHelper::Success('surat masuk retrieved successfully', $datas);
+        foreach ($datas as $suratMasuk) {
+            if (is_null($suratMasuk->userStatus)) {
+                $userStatus = UserStatus::firstOrCreate(
+                    ['user_id' => $userLogin->uuid, 'surat_masuk_id' => $suratMasuk->uuid],
+                    ['read_at' => null, 'pelaksanaan_at' => null]
+                );
+
+                $suratMasuk->setRelation('userStatus', $userStatus);
+            }
+        }
+
+        $datasArray = $datas->toArray();
+        return ResponseHelper::Success('surat masuk retrieved successfully', $datasArray);
     }
 
 
@@ -202,10 +183,11 @@ class SuratMasukController extends Controller
         return ResponseHelper::Success('data for surat masuk retrieved successfully', $datas);
     }
 
-    public function done(SuratMasuk $suratMasukId) {
+    public function done(SuratMasuk $suratMasukId): JsonResponse
+    {
         $userLogin = AuthHelper::getAuthenticatedUser();
 
-        $userStatus =  UserStatus::where('surat_masuk_id', $suratMasukId->uuid)->where('user_id', $userLogin->uuid)->first();
+        $userStatus = UserStatus::where('surat_masuk_id', $suratMasukId->uuid)->where('user_id', $userLogin->uuid)->first();
         $userStatus->update(['pelaksanaan_at' => now()]);
 
         return ResponseHelper::Success('mark as done successfully', $userStatus);

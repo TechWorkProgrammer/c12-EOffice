@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\AuthHelper;
 use App\Helpers\ResponseHelper;
 use App\Models\MUser;
 use Illuminate\Http\JsonResponse;
@@ -46,8 +47,7 @@ class AuthController extends Controller
             return ResponseHelper::Unauthorized('Email tidak terdaftar atau Password Salah');
         }
 
-
-        $userInfo = MUser::with('pejabat')->find(Auth::guard('api')->user()->uuid);
+        $userInfo = MUser::with('pejabat')->find(AuthHelper::getAuthenticatedUser()->uuid);
         return ResponseHelper::Success('login successful', ['user' => $userInfo, 'token' => $token]);
     }
 
