@@ -8,6 +8,7 @@ use Webpatser\Uuid\Uuid;
 
 /**
  * @method static first(string $string)
+ * @method static create(string[] $array)
  */
 class Satminkal extends Model
 {

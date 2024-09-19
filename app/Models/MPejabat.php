@@ -8,6 +8,7 @@ use Webpatser\Uuid\Uuid;
 
 /**
  * @method static where(string $string, string $string1)
+ * @property mixed $uuid
  */
 class MPejabat extends Model
 {

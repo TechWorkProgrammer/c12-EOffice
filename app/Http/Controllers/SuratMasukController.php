@@ -67,8 +67,7 @@ class SuratMasukController extends Controller
             }
         }
 
-        $datasArray = $datas->toArray();
-        return ResponseHelper::Success('surat masuk retrieved successfully', $datasArray);
+        return ResponseHelper::Success('surat masuk retrieved successfully', $datas);
     }
 
 
