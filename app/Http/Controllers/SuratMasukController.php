@@ -195,29 +195,40 @@ class SuratMasukController extends Controller
         return ResponseHelper::Success('mark as done successfully', $userStatus);
     }
 
-    public function logUser(MUser $userId) {
-        $userLogin = AuthHelper::getAuthenticatedUser();
+    public function logUser(MUser $userId, Request $request) {
+        try {
+            $userLogin = AuthHelper::getAuthenticatedUser();
 
-        $datas['status_user'] = UserStatus::where('user_id', $userId->uuid)->with('suratMasuk')->get();
+            $validatedData = $request->validate([
+                'bulan' => 'nullable|integer',
+            'tahun' => 'nullable|integer',
+            ]);
 
-        switch ($userLogin->role) {
-            case 'Tata Usaha':
-                $datas['surat_masuk'] = SuratMasuk::where('created_by', $userLogin->uuid)->get();
-                $datas['surat_keluar'] = SuratKeluar::where('created_by', $userLogin->uuid)->get();
-                break;
+            $tahun = $validatedData['tahun'] == null ? now()->year : $validatedData['tahun'];
+            $bulan = $validatedData['bulan'] == null ? now()->month : $validatedData['bulan'];
 
-            case 'Pejabat':
-                $datas['disposisi'] = Disposisi::where('created_by', $userLogin->uuid)->get();
-                break;
+            $datas['status_user'] = UserStatus::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('user_id', $userId->uuid)->with('suratMasuk')->get();
 
-            case 'External':
-                $datas['draft_surat_keluar'] = Draft::where('created_by', $userLogin->uuid)->get();
-                break;
+            switch ($userLogin->role) {
+                case 'Tata Usaha':
+                    $datas['surat_masuk'] = SuratMasuk::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('created_by', $userLogin->uuid)->get();
+                    $datas['surat_keluar'] = SuratKeluar::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('created_by', $userLogin->uuid)->get();
+                    break;
 
+                case 'Pejabat':
+                    $datas['disposisi'] = Disposisi::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('created_by', $userLogin->uuid)->get();
+                    break;
+
+                case 'External':
+                    $datas['draft_surat_keluar'] = Draft::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('created_by', $userLogin->uuid)->get();
+                    break;
+            }
+
+
+            return ResponseHelper::Success('data for log user retrieved successfully', $datas);
+        } catch (\Exception $e) {
+            return ResponseHelper::InternalServerError($e->getMessage());
         }
-
-
-        return ResponseHelper::Success('data for log user retrieved successfully', $datas);
     }
 
     public function generateNoSuratMasuk($klasifikasiId): string
