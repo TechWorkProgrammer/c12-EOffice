@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Helpers\AuthHelper;
 use App\Helpers\CommonHelper;
 use App\Helpers\ResponseHelper;
+use App\Models\Disposisi;
+use App\Models\Draft;
 use App\Models\LogDisposisi;
 use App\Models\MKlasifikasiSurat;
 use App\Models\MUser;
+use App\Models\SuratKeluar;
 use App\Models\SuratMasuk;
 use App\Models\UserStatus;
 use Carbon\Carbon;
@@ -190,6 +193,31 @@ class SuratMasukController extends Controller
         $userStatus->update(['pelaksanaan_at' => now()]);
 
         return ResponseHelper::Success('mark as done successfully', $userStatus);
+    }
+
+    public function logUser(MUser $userId) {
+        $userLogin = AuthHelper::getAuthenticatedUser();
+
+        $datas['status_user'] = UserStatus::where('user_id', $userId->uuid)->with('suratMasuk')->get();
+
+        switch ($userLogin->role) {
+            case 'Tata Usaha':
+                $datas['surat_masuk'] = SuratMasuk::where('created_by', $userLogin->uuid)->get();
+                $datas['surat_keluar'] = SuratKeluar::where('created_by', $userLogin->uuid)->get();
+                break;
+
+            case 'Pejabat':
+                $datas['disposisi'] = Disposisi::where('created_by', $userLogin->uuid)->get();
+                break;
+
+            case 'External':
+                $datas['draft_surat_keluar'] = Draft::where('created_by', $userLogin->uuid)->get();
+                break;
+
+        }
+
+
+        return ResponseHelper::Success('data for log user retrieved successfully', $datas);
     }
 
     public function generateNoSuratMasuk($klasifikasiId): string

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DisposisiController;
 use App\Http\Controllers\DraftController;
@@ -33,9 +34,17 @@ Route::prefix('pejabat')->group(function () {
     Route::post('', [PejabatController::class, 'store'])->middleware('auth.administrator');
 });
 
+
+Route::middleware('auth.administrator')->group(function () {
+    Route::prefix('admin')->group(function () {
+        Route::get('user', [AdminController::class, 'allUser']);
+    });
+});
+
 Route::middleware('auth.any')->group(function () {
     Route::prefix('surat-masuk')->group(function () {
         Route::get('', [SuratMasukController::class, 'index']);
+        Route::get('log/user/{userId}', [SuratMasukController::class, 'logUser']);
         Route::get('create', [SuratMasukController::class, 'create']);
         Route::get('{suratMasukId}', [SuratMasukController::class, 'show']);
         Route::put('{suratMasukId}/done', [SuratMasukController::class, 'done'])->middleware('auth.any.pelaksana');
