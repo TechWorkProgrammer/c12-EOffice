@@ -27,4 +27,18 @@ class Signature extends Model
             $model->uuid = (string)Uuid::generate(4);
         });
     }
+
+    protected $fillable = [
+        'uuid',
+        'user_id',
+        'image',
+        'doc_name',
+        'doc_page',
+        'doc_ext'
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(MUser::class, 'user_id', 'uuid');
+    }
 }

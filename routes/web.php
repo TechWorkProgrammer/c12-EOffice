@@ -7,6 +7,7 @@ use App\Http\Controllers\DraftController;
 use App\Http\Controllers\KotamaController;
 use App\Http\Controllers\PejabatController;
 use App\Http\Controllers\SatminkalController;
+use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SuratKeluarController;
 use App\Http\Controllers\SuratMasukController;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +33,12 @@ Route::prefix('satminkal')->group(function () {
 Route::prefix('pejabat')->group(function () {
     Route::get('', [PejabatController::class, 'index']);
     Route::post('', [PejabatController::class, 'store'])->middleware('auth.administrator');
+});
+
+Route::prefix('signature')->group(function () {
+    Route::get('', [SignatureController::class, 'index'])->middleware('auth.any');
+    Route::get('{signatureId}', [SignatureController::class, 'show']);
+    Route::post('', [SignatureController::class, 'store'])->middleware('auth.any');
 });
 
 

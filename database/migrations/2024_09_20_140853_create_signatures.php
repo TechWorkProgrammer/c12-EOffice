@@ -15,6 +15,9 @@ return new class extends Migration
             $table->uuid()->unique()->primary();
             $table->foreignUuid('user_id')->references('uuid')->on('m_users');
             $table->string('image');
+            $table->string('doc_name');
+            $table->string('doc_page');
+            $table->string('doc_ext');
             $table->timestamps();
         });
     }
