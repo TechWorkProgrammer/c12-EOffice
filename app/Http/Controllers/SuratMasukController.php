@@ -51,7 +51,9 @@ class SuratMasukController extends Controller
                 foreach ($logDisposisis as $logDisposisi) {
                     $suratMasuk = $logDisposisi->disposisi->suratMasuk;
                     if ($suratMasuk) {
-                        $suratMasuk->load(['creator', 'penerima', 'klasifikasiSurat']);
+                        $suratMasuk->load(['creator', 'penerima', 'klasifikasiSurat', 'userStatus' => function ($query) use ($userLogin) {
+                                $query->where('user_id', $userLogin->uuid);
+                            }]);
                         $datas[] = $suratMasuk;
                     }
                 }
