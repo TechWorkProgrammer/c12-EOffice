@@ -37,7 +37,9 @@ class SuratMasukController extends Controller
                     foreach ($logDisposisis as $logDisposisi) {
                         $suratMasuk = $logDisposisi->disposisi->suratMasuk;
                         if ($suratMasuk) {
-                            $suratMasuk->load(['creator', 'penerima', 'klasifikasiSurat']);
+                            $suratMasuk->load(['creator', 'penerima', 'klasifikasiSurat', 'userStatus' => function ($query) use ($userLogin) {
+                                $query->where('user_id', $userLogin->uuid);
+                            }]);
                             $datas[] = $suratMasuk;
                         }
                     }
@@ -195,13 +197,14 @@ class SuratMasukController extends Controller
         return ResponseHelper::Success('mark as done successfully', $userStatus);
     }
 
-    public function logUser(MUser $userId, Request $request) {
+    public function logUser(MUser $userId, Request $request)
+    {
         try {
             $userLogin = AuthHelper::getAuthenticatedUser();
 
             $validatedData = $request->validate([
                 'bulan' => 'nullable|integer',
-            'tahun' => 'nullable|integer',
+                'tahun' => 'nullable|integer',
             ]);
 
             $tahun = $validatedData['tahun'] == null ? now()->year : $validatedData['tahun'];
