@@ -8,6 +8,7 @@ use Webpatser\Uuid\Uuid;
 
 /**
  * @method static create(array $array)
+ * @method static whereMonth(string $string, mixed $bulan)
  * @property mixed $uuid
  * @property mixed $logDisposisis
  */

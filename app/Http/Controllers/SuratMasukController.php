@@ -52,8 +52,8 @@ class SuratMasukController extends Controller
                     $suratMasuk = $logDisposisi->disposisi->suratMasuk;
                     if ($suratMasuk) {
                         $suratMasuk->load(['creator', 'penerima', 'klasifikasiSurat', 'userStatus' => function ($query) use ($userLogin) {
-                                $query->where('user_id', $userLogin->uuid);
-                            }]);
+                            $query->where('user_id', $userLogin->uuid);
+                        }]);
                         $datas[] = $suratMasuk;
                     }
                 }
@@ -199,41 +199,36 @@ class SuratMasukController extends Controller
         return ResponseHelper::Success('mark as done successfully', $userStatus);
     }
 
-    public function logUser(MUser $userId, Request $request)
+    public function logUser(MUser $userId, Request $request): JsonResponse
     {
-        try {
-            $userLogin = AuthHelper::getAuthenticatedUser();
+        $userLogin = AuthHelper::getAuthenticatedUser();
 
-            $validatedData = $request->validate([
-                'bulan' => 'nullable|integer',
-                'tahun' => 'nullable|integer',
-            ]);
+        $validatedData = $request->validate([
+            'bulan' => 'nullable|integer',
+            'tahun' => 'nullable|integer',
+        ]);
 
-            $tahun = $validatedData['tahun'] == null ? now()->year : $validatedData['tahun'];
-            $bulan = $validatedData['bulan'] == null ? now()->month : $validatedData['bulan'];
+        $tahun = $validatedData['tahun'] == null ? now()->year : $validatedData['tahun'];
+        $bulan = $validatedData['bulan'] == null ? now()->month : $validatedData['bulan'];
 
-            $datas['status_user'] = UserStatus::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('user_id', $userId->uuid)->with('suratMasuk')->get();
+        $datas['status_user'] = UserStatus::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('user_id', $userId->uuid)->with('suratMasuk')->get();
 
-            switch ($userLogin->role) {
-                case 'Tata Usaha':
-                    $datas['surat_masuk'] = SuratMasuk::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('created_by', $userLogin->uuid)->get();
-                    $datas['surat_keluar'] = SuratKeluar::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('created_by', $userLogin->uuid)->get();
-                    break;
+        switch ($userLogin->role) {
+            case 'Tata Usaha':
+                $datas['surat_masuk'] = SuratMasuk::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('created_by', $userLogin->uuid)->get();
+                $datas['surat_keluar'] = SuratKeluar::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('created_by', $userLogin->uuid)->get();
+                break;
 
-                case 'Pejabat':
-                    $datas['disposisi'] = Disposisi::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('created_by', $userLogin->uuid)->get();
-                    break;
+            case 'Pejabat':
+                $datas['disposisi'] = Disposisi::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('created_by', $userLogin->uuid)->get();
+                break;
 
-                case 'External':
-                    $datas['draft_surat_keluar'] = Draft::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('created_by', $userLogin->uuid)->get();
-                    break;
-            }
-
-
-            return ResponseHelper::Success('data for log user retrieved successfully', $datas);
-        } catch (\Exception $e) {
-            return ResponseHelper::InternalServerError($e->getMessage());
+            case 'External':
+                $datas['draft_surat_keluar'] = Draft::whereMonth('created_at', $bulan)->whereYear('created_at', $tahun)->where('created_by', $userLogin->uuid)->get();
+                break;
         }
+
+        return ResponseHelper::Success('data for log user retrieved successfully', $datas);
     }
 
     public function generateNoSuratMasuk($klasifikasiId): string

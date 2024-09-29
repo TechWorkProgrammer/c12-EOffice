@@ -11,6 +11,7 @@ use Webpatser\Uuid\Uuid;
 /**
  * @method static where(string $string, $klasifikasiId)
  * @method static create(array $validatedData)
+ * @method static whereMonth(string $string, mixed $bulan)
  * @property mixed $uuid
  */
 class SuratMasuk extends Model

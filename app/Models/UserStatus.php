@@ -10,6 +10,7 @@ use Webpatser\Uuid\Uuid;
 /**
  * @method static firstOrCreate(array $array, null[] $array1)
  * @method static where(string $string, mixed $uuid)
+ * @method static whereMonth(string $string, mixed $bulan)
  */
 class UserStatus extends Model
 {

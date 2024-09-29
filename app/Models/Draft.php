@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Webpatser\Uuid\Uuid;
 
+/**
+ * @method static whereMonth(string $string, mixed $bulan)
+ */
 class Draft extends Model
 {
     use HasFactory;

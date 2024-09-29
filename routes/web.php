@@ -51,7 +51,7 @@ Route::middleware('auth.administrator')->group(function () {
 Route::middleware('auth.any')->group(function () {
     Route::prefix('surat-masuk')->group(function () {
         Route::get('', [SuratMasukController::class, 'index']);
-        Route::get('log/user/{userId}', [SuratMasukController::class, 'logUser']);
+        Route::post('log/user/{userId}', [SuratMasukController::class, 'logUser']);
         Route::get('create', [SuratMasukController::class, 'create']);
         Route::get('{suratMasukId}', [SuratMasukController::class, 'show']);
         Route::put('{suratMasukId}/done', [SuratMasukController::class, 'done'])->middleware('auth.any.pelaksana');
