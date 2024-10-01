@@ -53,6 +53,10 @@ class Handler extends ExceptionHandler
             return $this->handleJsonException($e);
         }
 
+        if ($e instanceof MethodNotAllowedHttpException) {
+            abort(404);
+        }
+
         if ($this->isHttpException($e)) {
             return $this->renderHttpException($e);
         }

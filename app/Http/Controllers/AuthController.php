@@ -15,24 +15,16 @@ class AuthController extends Controller
     {
         $validatedData = $request->validate([
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|string|max:255',
+            'role' => 'required|string|in:Tata Usaha,Pejabat,Pelaksana,External,Administrator',
             'email' => 'required|email|max:255',
             'name' => 'required|string|max:255',
             'pejabat_id' => 'nullable|string|max:255',
-            'satminkal_id' => 'required|string|max:255',
+            'satminkal_id' => 'nullable|string|max:255',
         ]);
 
         $user = MUser::create($validatedData);
 
-        $credentials = $request->only('email', 'password');
-        if (!$token = Auth::guard('api')->attempt($credentials)) {
-            return ResponseHelper::Unauthorized('Gagal melakukan autentikasi setelah registrasi.');
-        }
-
-        return ResponseHelper::Success('Akun berhasil dibuat dan login', [
-            'user' => $user,
-            'token' => $token,
-        ]);
+        return ResponseHelper::Success('Akun berhasil dibuat dan login', $user);
 
     }
 

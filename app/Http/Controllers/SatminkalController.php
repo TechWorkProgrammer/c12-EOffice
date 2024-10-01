@@ -4,16 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ResponseHelper;
 use App\Models\Satminkal;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class SatminkalController extends Controller
 {
-    public function index() {
+    public function index(): JsonResponse
+    {
         $datas = Satminkal::with('kotama')->get();
         return ResponseHelper::Success('data satminkal retrieved successfully', $datas);
     }
 
-    public function store(Request $request) {
+    public function store(Request $request): JsonResponse
+    {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'kode_kotama' => 'required|string|max:255',
