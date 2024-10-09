@@ -42,7 +42,7 @@ class MUserSeeder extends Seeder {
             // Role yang tidak terkait pejabat
             ['name' => 'Tata Usaha', 'email' => 'tatausaha@company.com', 'role' => 'Tata Usaha', 'pejabat_name' => null],
             ['name' => 'Administrator', 'email' => 'admin@company.com', 'role' => 'Administrator', 'pejabat_name' => null],
-            ['name' => 'External', 'email' => 'external@company.com', 'role' => 'External', 'pejabat_name' => null]
+            ['name' => 'External', 'email' => 'external@company.com', 'role' => 'External', 'pejabat_name' => 'External 1']
         ];
 
         // Buat setiap user berdasarkan array

@@ -22,7 +22,6 @@ class DraftController extends Controller
         switch ($userLogin->role) {
             case 'Tata Usaha':
                 $datas = Draft::all();
-
                 break;
             case 'Eksternal':
             case 'Pelaksana':

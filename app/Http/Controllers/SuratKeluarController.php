@@ -17,7 +17,12 @@ class SuratKeluarController extends Controller
 {
     public function index(): JsonResponse
     {
-        $datas = SuratKeluar::all();
+        $datas = SuratKeluar::with([
+            'ekspedisi',
+            'klasifikasi_surat',
+            'pengirim',
+            'creator'
+        ])->get();
         return ResponseHelper::Success('data for create surat Keluar retrieved successfully', $datas);
     }
 

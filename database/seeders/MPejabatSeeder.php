@@ -18,7 +18,8 @@ class MPejabatSeeder extends Seeder
                 'Kasub Intelijen' => [
                     'Kabag Intel Administrasi' => ['Pelaksana B1', 'Pelaksana B2'],
                     'Kabag Intel Operasi' => ['Pelaksana B3', 'Pelaksana B4']
-                ]
+                ],
+                'External 1' => [],
             ]
         ];
 
