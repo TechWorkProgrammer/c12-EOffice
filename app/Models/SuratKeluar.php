@@ -9,6 +9,7 @@ use Webpatser\Uuid\Uuid;
 /**
  * @method static where(string $string, $klasifikasiId)
  * @method static whereMonth(string $string, mixed $bulan)
+ * @method static create(array $array)
  */
 class SuratKeluar extends Model
 {

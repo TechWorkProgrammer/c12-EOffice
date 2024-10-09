@@ -68,8 +68,8 @@ class Kernel extends HttpKernel
      */
     protected $middlewareAliases = [
         'auth' => CustomAuthentication::class,
-        'auth.any' => RoleMiddleware::class . ':Tata Usaha,Pejabat,Pelaksana,Eksternal',
-        'auth.any.pelaksana' => RoleMiddleware::class . ':Pelaksana,Eksternal',
+        'auth.any' => RoleMiddleware::class . ':Tata Usaha,Pejabat,Pelaksana,External',
+        'auth.any.pelaksana' => RoleMiddleware::class . ':Pelaksana,External',
         'auth.pejabat' => RoleMiddleware::class . ':Pejabat',
         'auth.tata-usaha' => RoleMiddleware::class . ':Tata Usaha',
         'auth.administrator' => RoleMiddleware::class . ':Administrator',

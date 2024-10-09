@@ -8,6 +8,15 @@ use Webpatser\Uuid\Uuid;
 
 /**
  * @method static whereMonth(string $string, mixed $bulan)
+ * @method static where(string $string, mixed $uuid)
+ * @method static create(array $validatedData)
+ * @property mixed $pengajuans
+ * @property mixed $uuid
+ * @property mixed|string $status
+ * @property mixed $created_by
+ * @property mixed $creator
+ * @property mixed $perihal
+ * @property mixed $file_surat
  */
 class Draft extends Model
 {

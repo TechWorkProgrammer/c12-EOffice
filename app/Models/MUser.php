@@ -54,6 +54,10 @@ class MUser extends Authenticatable implements JWTSubject
         'name', 'email', 'role', 'pejabat_id', 'satminkal_id', 'password'
     ];
 
+    protected $hidden = [
+        'password'
+    ];
+
     public function pejabat(): BelongsTo
     {
         return $this->belongsTo(MPejabat::class, 'pejabat_id', 'uuid');

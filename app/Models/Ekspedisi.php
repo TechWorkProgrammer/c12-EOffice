@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Webpatser\Uuid\Uuid;
 
+/**
+ * @method static create(array $array)
+ */
 class Ekspedisi extends Model
 {
     use HasFactory;

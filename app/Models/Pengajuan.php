@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Webpatser\Uuid\Uuid;
 
+/**
+ * @method static where(string $string, mixed $uuid)
+ * @method static create(array $array)
+ */
 class Pengajuan extends Model
 {
     use HasFactory;
