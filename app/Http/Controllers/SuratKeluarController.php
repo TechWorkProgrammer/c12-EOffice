@@ -66,8 +66,9 @@ class SuratKeluarController extends Controller
 
     public function show(SuratKeluar $suratKeluarId): JsonResponse
     {
-        $datas = $suratKeluarId->with(['klasifikasi_surat', 'pengirim', 'creator', 'ekspedisi'])->get();
-        return ResponseHelper::Success('surat Keluar retrieved successfully', $datas);
+        $suratKeluarId->load(['klasifikasi_surat', 'pengirim', 'creator', 'ekspedisi']);
+
+        return ResponseHelper::Success('Surat Keluar retrieved successfully', $suratKeluarId);
     }
 
     public function generateNoSuratKeluar($klasifikasiId): string
