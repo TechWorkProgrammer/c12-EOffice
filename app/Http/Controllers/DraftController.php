@@ -107,14 +107,16 @@ class DraftController extends Controller
 
     public function show(Draft $draftId): JsonResponse
     {
-        $datas = $draftId->with([
+        $draftId->load([
             'creator',
             'pengajuanLevel1.penerima',
             'pengajuanLevel1.pengajuanLevel2.penerima',
             'pengajuanLevel1.pengajuanLevel2.pengajuanLevel3.penerima',
-        ])->get();
-        return ResponseHelper::Success('drafts retrieved successfully', $datas);
+        ]);
+
+        return ResponseHelper::Success('draft retrieved successfully', $draftId);
     }
+
 
     public function read(Draft $draftId): JsonResponse
     {
